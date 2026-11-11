@@ -193,6 +193,24 @@ td.stc{width:84px}.stm{display:none}
 .hcard .hint{font-size:13px;color:#9fd3ff;margin-top:4px}.hcard .ds{font-size:13px;line-height:1.7;color:var(--ink2);margin-top:4px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(140%);z-index:50;display:flex;gap:12px;align-items:center;padding:12px 16px;background:#0d1033;border:3px solid #ffd75e;border-radius:6px;box-shadow:0 0 0 3px #0d1033,0 8px 24px #0008;transition:transform .25s steps(5);max-width:92vw}
 .toast.on{transform:translateX(-50%) translateY(0)}.toast canvas{width:48px;height:48px;image-rendering:pixelated;object-fit:contain}.toast b{color:#ffd75e;font-weight:400;display:block;font-size:13px}.toast span{font-size:15px}
+/* ===== 公會調查站 ===== */
+.gform .q{padding:14px 0;border-bottom:1px dashed #ffffff22}.gform .q:last-of-type{border-bottom:0}
+.gform .qt{font-size:16px;color:#ffd75e;margin-bottom:4px}.gform .qt small{font-size:12px;color:var(--muted);margin-left:6px}
+.gform .qh{font-size:12.5px;color:var(--muted);margin-bottom:8px}
+.gform .opts{display:flex;flex-wrap:wrap;gap:8px}
+.gform .opt{position:relative}.gform .opt input{position:absolute;opacity:0;pointer-events:none}
+.gform .opt span{display:inline-block;padding:6px 12px;border:2px solid var(--edge);border-radius:4px;font-size:14px;cursor:pointer;color:var(--ink2);user-select:none}
+.gform .opt span small{display:block;font-size:11px;color:var(--muted)}
+.gform .opt input:checked+span{background:#e8b23a;border-color:#e8b23a;color:#1a1e45}.gform .opt input:checked+span small{color:#1a1e4599}
+.gform .opt input:focus-visible+span{outline:2px solid #ffd75e;outline-offset:2px}
+.gform .opt input:disabled+span{opacity:.35;cursor:not-allowed}
+.gform .bar2{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px}
+.gform .go{font:inherit;font-size:15px;padding:8px 18px;border-radius:4px;border:3px solid #ffd75e;background:#e8b23a;color:#1a1e45;cursor:pointer}
+.gform .go:disabled{opacity:.4;cursor:not-allowed}.gform .err{color:#ff8f7a;font-size:13px}
+.gform .prog{font-size:13px;color:var(--muted)}
+.badge{display:grid;grid-template-columns:96px 1fr;gap:16px;align-items:center;padding:16px;border:3px double #ffd75e;border-radius:6px}
+.badge canvas{width:96px;height:96px;image-rendering:pixelated}.badge h3{margin:0 0 6px;color:#ffd75e;font-weight:400;font-size:18px}
+.badge .ln{font-size:13.5px;line-height:1.8;color:var(--ink2)}.badge .ln b{color:var(--ink);font-weight:400}@media (max-width:600px){.badge{grid-template-columns:1fr;justify-items:center;text-align:left}.badge canvas{width:72px;height:72px}.badge h3{text-align:center}}
 /* ===== 魔物 ===== */
 .mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
 .mcard{padding:14px;position:relative}.mcard .hd{display:flex;gap:12px;align-items:center}.mcard canvas{width:64px;height:64px;image-rendering:pixelated;flex:none}
@@ -244,6 +262,7 @@ footer,footer .sig{color:#c9cdf2}
     <button data-v="fee" class="on">營地情報</button>
     <button data-v="forest">魔域情報</button>
     <button data-v="mon">魔物情報</button>
+    <button data-v="guild">公會調查站</button>
   </div>
 </div></div>
 
@@ -316,6 +335,17 @@ footer,footer .sig{color:#c9cdf2}
   <div class="scrollp note"><h3>📜 魔域須知</h3><ul>
     <li>名單依林業及自然保育署公布的國家森林遊樂區，共 19 處（拉拉山於 2023 年成為第 19 處）。</li>
     <li>海拔為約略範圍，地圖標記為概略位置；入園時間、休園與門票請以「台灣山林悠遊網」公告為準。</li>
+  </ul></div>
+</section>
+
+<!-- ================= 公會調查站 ================= -->
+<section class="view" id="v-guild">
+  <div class="banner"><canvas id="sp-guild" width="16" height="16" style="width:72px;height:72px"></canvas>
+    <div class="say menu"><b>公會櫃台小姐</b>：歡迎光臨冒險者公會！為了替勇者們找到更好的營地，公會正在進行一份小調查。只有 5 題，大約 1 分鐘，完成後可以領取公會徽章喔！</div></div>
+  <div class="scrollp gform" id="gform"></div>
+  <div class="scrollp note"><h3>📜 調查須知</h3><ul>
+    <li>本調查為匿名填寫，不會詢問姓名、電話或電子郵件，結果只做整體統計，用於了解露營愛好者的偏好。</li>
+    <li>題目沒有對錯，依你自己的習慣作答即可；營地價格指一帳一晚的費用。</li>
   </ul></div>
 </section>
 
@@ -401,6 +431,8 @@ const SPR={
  karen:["................",".....eeeeee.....","....eeeeeeee....","....kssssssk....","....kkssskkk....","....ksessesk....","....ksssssskk...",".....ksrrsk..ks.","...kkooooookkks.","..koooooooook...","..ksoooooook....","...kooooook.....","....kOOkkOOk....","....knnk.knnk...","....kkkk.kkkk...","................"],
  noisy:["................","......eeee......",".....eeeeee.....","....kssssssk....","....ksessesk....","....ksssssskhh.w","....kssrrsskhhw.","....kssssskhhh.w",".....kssssk.hh..","...kkppppppkk...","..kppppppppppk..","..kspppppppsk...","...kpppppppk....","....kmmkkmmk....","....knnk.knnk...","....kkkk.kkkk..."],
  muntjac:["................","....k.k.........","...kNkNk........","...knnnk........","..knnennk.......","..knnnnnk.......","..kkkknnnkkkkkk.","......knnnnnnnnk",".....knnnnnnnnnk",".....knnnnnnnnk.",".....kcnnnnnnck.","......kn.kn.knk.","......kn.kn..kn.","......kk.kk..kk.","................","................"],
+ guild:["................","......kkkk......",".....keeeek.....","....keeeeeek....","....kssssssk....","...ekseesesek...","...eksssssske...","...ek.ksrsk.ke..","....kkppppkk....","...kpppwwpppk...","..kspppwwpppsk..","..kkppppppppkk..","...kYYYYYYYYk...","...kyyyyyyyyk...","...kYYYYYYYYk...","...kkkkkkkkkk..."],
+ emblem:["................","......kkkk......","....kkyyyykk....","...kyyYYYYyyk...","..kyYYkyykYYyk..","..kyYkrrrrkYyk..",".kyYYkrwrrkYYyk.",".kyYYkrrrrkYYyk.",".kyYYYkrrkYYYyk.","..kyYYYkkYYYyk..","..kyyYYYYYYyyk..","...kyyyyyyyyk...","....kkb..bkk....","....kbB..Bbk....","...kbBk..kBbk...","...kkk....kkk..."],
  tree:["....kk....","...kGGk...","..kGgGGk..","..kGGgGk..",".kGgGGgGk.",".kGGGgGGk.","kGgGGGgGGk","kkkkGGkkkk","....kn....","....kk...."]
 };
 function draw(cv,spr,scale){const g=cv.getContext("2d");const rows=SPR[spr];cv.width=rows[0].length;cv.height=rows.length;g.clearRect(0,0,cv.width,cv.height);rows.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!=="."){g.fillStyle=PAL[ch];g.fillRect(x,y,1,1)}}))}
@@ -412,7 +444,7 @@ function showView(v){document.querySelectorAll("#tabs button").forEach(b=>b.clas
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>showView(b.dataset.v));
 {const h=document.getElementById("home");const go=e=>{if(e){e.preventDefault();e.stopPropagation()}showView("fee");try{document.scrollingElement.scrollTop=0;document.body.scrollTop=0}catch(_){}};
  h.addEventListener("click",go);h.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" ")go(e)})}
-if(["fee","forest","mon"].includes(location.hash.slice(1)))showView(location.hash.slice(1));
+if(["fee","forest","mon","guild"].includes(location.hash.slice(1)))showView(location.hash.slice(1));
 
 /* ---------------- data ---------------- */
 const CAMPS=PUB.map(r=>({c:r[0],ot:r[1],n:r[2],q:r[3],alt:r[4],src:r[5],st:r[6],id:r[0]+"|"+r[2]}));
@@ -640,6 +672,39 @@ const visited=new Set();const _select=select;select=function(c,fb){_select(c,fb)
 // 5 漏氣魔：深夜造訪
 {const hr=NOW.getHours();if(hr>=23||hr<5)setTimeout(()=>unlock("air"),1500)}
 drawHidden();
+/* ---- 公會調查站 ---- */
+// 連接 Google 表單：填入表單 ID 與各題的 entry 編號後，回覆會送到表單（只在 GitHub Pages 上送出）
+const GFORM={id:"",entry:{q1:"",q2:"",q3:"",q4:"",q5:""}};
+const GQ=[
+ {k:"q1",t:"你已經露營過幾次？",type:"one",o:[["還沒露營過","見習冒險者"],["1–5 次","新手勇者"],["6–20 次","露營騎士"],["21–50 次","流浪勇者"],["50 次以上","傳說勇者"]]},
+ {k:"q2",t:"可以接受的營地價格？",h:"一帳一晚的費用，單位：G（新台幣元）",type:"one",o:[["800 G 以下"],["800–1,200 G"],["1,200–1,600 G"],["1,600–2,000 G"],["2,000 G 以上"]]},
+ {k:"q3",t:"喜歡哪些類型的營地？",h:"可複選",type:"multi",o:[["草皮營位"],["碎石營位"],["棧板營位"],["雨棚營位"],["森林系"],["溪邊・玩水"],["海景"],["高山・雲海"],["親子設施"],["寵物友善"],["包區"],["免裝備・懶人露營"]]},
+ {k:"q4",t:"最常去哪些縣市露營？",h:"最多選 3 個",type:"multi",max:3,o:Object.keys(OLD).filter(c=>c!=="連江縣").map(c=>[c,OLD[c]])},
+ {k:"q5",t:"喜歡哪種帳篷？",h:"可複選",type:"multi",o:[["圓頂帳"],["隧道帳"],["錐形帳（印地安帳）"],["鐘型帳・蒙古包"],["客廳帳"],["車頂帳"],["車邊帳・車泊"],["吊床"],["炊事帳・天幕"]]}];
+let GDONE=null;try{GDONE=JSON.parse(localStorage.getItem("hcmap_survey")||"null")}catch(e){}
+function gAns(){const a={};for(const q of GQ){a[q.k]=[...document.querySelectorAll(`#gform input[name="${q.k}"]:checked`)].map(i=>i.value)}return a}
+function drawGuild(){
+  const el=document.getElementById("gform");
+  if(GDONE){const lv=GQ[0].o.find(o=>o[0]===GDONE.q1[0]);
+    el.innerHTML=`<div class="ttl">公會徽章</div><div class="badge"><canvas id="gbadge" width="16" height="16"></canvas><div><h3>✦ 冒險者公會 正式成員</h3><div class="ln">
+     等級：<b>${lv&&lv[1]?lv[1]:"冒險者"}</b>（露營 ${GDONE.q1[0]}）<br>預算：<b>${GDONE.q2[0]}</b><br>偏好營地：<b>${GDONE.q3.join("、")}</b><br>
+     常去地區：<b>${GDONE.q4.map(c=>`${OLD[c]}（${c}）`).join("、")}</b><br>愛用帳篷：<b>${GDONE.q5.join("、")}</b></div>
+     <div class="bar2"><span class="prog">感謝你的回覆！公會會把大家的答案整理成統計。</span><button class="mon-btn" id="gRedo">重新填寫</button></div></div></div>`;
+    draw(document.getElementById("gbadge"),"emblem");document.getElementById("gRedo").onclick=()=>{GDONE=null;drawGuild()};return}
+  el.innerHTML=`<div class="ttl">冒險者偏好調查</div>`+GQ.map((q,i)=>`<div class="q" data-k="${q.k}"><div class="qt">Q${i+1}. ${q.t}${q.type==="one"?"<small>單選</small>":""}</div>${q.h?`<div class="qh">${q.h}</div>`:""}<div class="opts">${q.o.map(o=>`<label class="opt"><input type="${q.type==="one"?"radio":"checkbox"}" name="${q.k}" value="${o[0]}"><span>${o[0]}${o[1]?`<small>${o[1]}</small>`:""}</span></label>`).join("")}</div></div>`).join("")+
+   `<div class="bar2"><button class="go" id="gGo">📜 提交給公會</button><span class="prog" id="gProg"></span><span class="err" id="gErr"></span></div>`;
+  const upd=()=>{const a=gAns();const n=GQ.filter(q=>a[q.k].length).length;document.getElementById("gProg").textContent=`已完成 ${n}／${GQ.length} 題`;
+    const q4=GQ[3];const full=a.q4.length>=q4.max;document.querySelectorAll('#gform input[name="q4"]').forEach(i=>{i.disabled=full&&!i.checked})};
+  el.addEventListener("change",upd);upd();
+  document.getElementById("gGo").onclick=async()=>{const a=gAns();const miss=GQ.findIndex(q=>!a[q.k].length);
+    if(miss>=0){document.getElementById("gErr").textContent=`第 ${miss+1} 題還沒回答喔！`;document.querySelector(`#gform .q[data-k="${GQ[miss].k}"]`).scrollIntoView({behavior:"smooth",block:"center"});return}
+    document.getElementById("gErr").textContent="";const btn=document.getElementById("gGo");btn.disabled=true;btn.textContent="傳送中…";
+    if(GFORM.id&&/github\.io$/.test(location.hostname)){try{const fd=new FormData();for(const q of GQ){const e=GFORM.entry[q.k];if(e)fd.append("entry."+e,a[q.k].join("、"))}
+      await fetch(`https://docs.google.com/forms/d/e/${GFORM.id}/formResponse`,{method:"POST",mode:"no-cors",body:fd})}catch(e){}}
+    GDONE=a;try{localStorage.setItem("hcmap_survey",JSON.stringify(a))}catch(e){}drawGuild();window.scrollTo({top:0})};
+}
+draw(document.getElementById("sp-guild"),"guild");
+drawGuild();
 drawSeason();drawHero();
 select(selected,true);
 
