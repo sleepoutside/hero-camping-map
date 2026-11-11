@@ -157,7 +157,7 @@ footer .sig{color:var(--ink)}
 .banner canvas{image-rendering:pixelated;flex:none}
 @media (max-width:600px){table{font-size:12.5px}th,td{padding:6px 6px}td .town{display:block;min-width:0;font-size:11px;margin:0}td.altc{width:auto;font-size:11.5px}#detail td:first-child,#detail th:first-child{width:62px!important}td.altc .cold{display:block;margin:0}.top .in{padding:6px 10px 0}.chap{font-size:11px;margin-bottom:4px}.brand{margin-bottom:2px}.wrap{padding:16px 10px 24px}.scrollp{padding:12px 10px}}
 @media (max-width:860px){.grid2{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.brand h1{font-size:18px}.chap{margin-left:0}
-  .bar{grid-template-columns:72px 1fr 112px;font-size:13px}.tabs button{font-size:13px;padding:5px 10px 4px 20px}.tabs button.on::before{left:6px}
+  .bar{grid-template-columns:72px 1fr 112px;font-size:13px}.tabs button{font-size:13px;padding:5px 10px 4px 20px}.tabs button.on::before{left:6px}.tabs{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.tabs::-webkit-scrollbar{display:none}.tabs button{white-space:nowrap;flex:none;font-size:12.5px;padding:5px 8px 4px 17px}.tabs button.on::before{left:5px;top:8px;font-size:9px}.tabs button small{display:none}
   .banner canvas{width:56px!important;height:56px!important}}
 
 /* ===== 冒險足跡 ===== */
@@ -193,6 +193,11 @@ td.stc{width:84px}.stm{display:none}
 .hcard .hint{font-size:13px;color:#9fd3ff;margin-top:4px}.hcard .ds{font-size:13px;line-height:1.7;color:var(--ink2);margin-top:4px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(140%);z-index:50;display:flex;gap:12px;align-items:center;padding:12px 16px;background:#0d1033;border:3px solid #ffd75e;border-radius:6px;box-shadow:0 0 0 3px #0d1033,0 8px 24px #0008;transition:transform .25s steps(5);max-width:92vw}
 .toast.on{transform:translateX(-50%) translateY(0)}.toast canvas{width:48px;height:48px;image-rendering:pixelated;object-fit:contain}.toast b{color:#ffd75e;font-weight:400;display:block;font-size:13px}.toast span{font-size:15px}
+/* ===== 魔物挑戰（施工中）===== */
+.cast{position:relative;width:150px;height:150px;margin:0 auto;border:3px dashed #ffd75e66;border-radius:50%;display:grid;place-items:center;animation:spin 12s steps(24) infinite}
+.cast canvas{width:96px;height:96px;image-rendering:pixelated;animation:spin 12s steps(24) infinite reverse}
+.cast .rune{position:absolute;color:#ffd75e;font-size:18px}.cast .r1{top:-12px;left:50%;transform:translateX(-50%)}.cast .r2{bottom:-12px;left:50%;transform:translateX(-50%)}.cast .r3{left:-10px;top:50%;transform:translateY(-50%)}.cast .r4{right:-10px;top:50%;transform:translateY(-50%)}
+@keyframes spin{to{transform:rotate(360deg)}}@media (prefers-reduced-motion:reduce){.cast,.cast canvas{animation:none}}
 /* ===== 魔物 ===== */
 .mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
 .mcard{padding:14px;position:relative}.mcard .hd{display:flex;gap:12px;align-items:center}.mcard canvas{width:64px;height:64px;image-rendering:pixelated;flex:none}
@@ -246,6 +251,7 @@ footer,footer .sig{color:#c9cdf2}
     <button data-v="fee" class="on">營地情報</button>
     <button data-v="forest">魔域情報</button>
     <button data-v="mon">魔物情報</button>
+    <button data-v="duel">魔物挑戰 <small style="font-size:11px;opacity:.7">施工詠唱中</small></button>
   </div>
 </div></div>
 
@@ -319,6 +325,16 @@ footer,footer .sig{color:#c9cdf2}
     <li>名單依林業及自然保育署公布的國家森林遊樂區，共 19 處（拉拉山於 2023 年成為第 19 處）。</li>
     <li>海拔為約略範圍，地圖標記為概略位置；入園時間、休園與門票請以「台灣山林悠遊網」公告為準。</li>
   </ul></div>
+</section>
+
+<!-- ================= 魔物挑戰 ================= -->
+<section class="view" id="v-duel">
+  <div class="scrollp" style="text-align:center;padding:48px 18px">
+    <div class="cast"><canvas id="sp-cast" width="16" height="16"></canvas><span class="rune r1">✦</span><span class="rune r2">✧</span><span class="rune r3">✦</span><span class="rune r4">✧</span></div>
+    <div class="ttl" style="margin-top:18px;justify-content:center">魔物挑戰</div>
+    <p style="font-size:22px;margin:10px 0 4px">施工詠唱中<span class="dots">…</span></p>
+    <p class="sub">大魔導士正在詠唱建造咒文，挑戰關卡即將開放，勇者請先磨好你的劍！</p>
+  </div>
 </section>
 
 <!-- ================= 魔物情報 ================= -->
@@ -414,7 +430,7 @@ let _lastView="fee";function showView(v){if(_lastView!==v){try{if(window.goatcou
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>showView(b.dataset.v));
 {const h=document.getElementById("home");const go=e=>{if(e){e.preventDefault();e.stopPropagation()}showView("fee");try{document.scrollingElement.scrollTop=0;document.body.scrollTop=0}catch(_){}};
  h.addEventListener("click",go);h.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" ")go(e)})}
-if(["fee","forest","mon"].includes(location.hash.slice(1)))showView(location.hash.slice(1));
+if(["fee","forest","mon","duel"].includes(location.hash.slice(1)))showView(location.hash.slice(1));
 
 /* ---------------- data ---------------- */
 const CAMPS=PUB.map(r=>({c:r[0],ot:r[1],n:r[2],q:r[3],alt:r[4],src:r[5],st:r[6],id:r[0]+"|"+r[2]}));
@@ -660,6 +676,7 @@ function cloudSave(){if(!CLOUD||!CLOUD.ready||!CLOUD.ref)return;const body={done
     refreshDone();drawHidden()}
   CLOUD.ready=true;cloudSave();
 }catch(e){}})();
+draw(document.getElementById("sp-cast"),"hero");
 drawSeason();drawHero();
 select(selected,true);
 
