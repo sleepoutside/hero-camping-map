@@ -384,18 +384,26 @@ function drawBars(){
   document.querySelectorAll(".bar").forEach(el=>{el.onclick=()=>select(el.dataset.c,true);el.onmousemove=e=>hoverOK&&showTip(e,el.dataset.c);el.onmouseleave=()=>tip.style.opacity=0});
 }
 let sortKey="ot",sortDir=1,Q="";
-function drawDetail(){
-  const s=stats.get(selected);let list=[...by.get(selected)];const total=list.length;
+function rowsHTML(list){return list.map(d=>`<tr><td style="width:130px"><span class="town">${d.ot||"—"}</span></td><td><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.q)}" target="_blank" rel="noopener">${d.n}</a>${d.src?`<span class="osm" title="資料來源：OpenStreetMap">OSM</span>`:""}</td><td class="altc">${d.alt==null?"—":fmt(d.alt)+"m"}${(c=>c?`<span class="cold" title="依海拔估算，比平地低約 ${c.d}°C">${"❄".repeat(c.lv)||"☀"} ${c.d?`約-${c.d}°C`:"平地"}</span>`:"")(cold(d.alt))}</td></tr>`).join("")||'<tr><td colspan="3" style="text-align:center;color:var(--muted)">沒有符合條件的營地</td></tr>'}
+function drawRows(){
+  let list=[...by.get(selected)];const total=list.length;
   if(Q)list=list.filter(d=>(d.n+d.ot+d.q).includes(Q));
   list.sort((a,b)=>sortKey==="alt"?sortDir*((a.alt??-1)-(b.alt??-1)):sortDir*(sortKey==="ot"?(a.ot+a.n).localeCompare(b.ot+b.n,"zh-Hant"):a.n.localeCompare(b.n,"zh-Hant")));
-  const th=(k,t)=>`<th data-k="${k}">${t}${sortKey===k?(sortDir<0?" ↓":" ↑"):""}</th>`;
+  document.querySelector("#detail tbody").innerHTML=rowsHTML(list);
+  document.querySelector("#detail .cnt").textContent=`顯示 ${list.length}／${total} 處`;
+  document.querySelectorAll("#detail th[data-k]").forEach(el=>{const k=el.dataset.k;el.textContent=el.dataset.t+(sortKey===k?(sortDir<0?" ↓":" ↑"):"")});
+}
+function drawDetail(){
+  const th=(k,t)=>`<th data-k="${k}" data-t="${t}">${t}</th>`;
   document.getElementById("detail").innerHTML=`<div class="hd"><div class="ttl">${OLD[selected]}（${selected}）的營地一覽</div><span class="sub">點欄位標題排序 · 點營地名稱開啟 Google 地圖 · ❄ 夜寒度依海拔估算</span></div>
-   <div class="filters"><span style="color:var(--muted)">搜尋：</span><input id="q" value="${Q.replace(/"/g,"&quot;")}" placeholder="營地或鄉鎮名稱" style="font:inherit;font-size:13px;padding:4px 8px;border-radius:4px;border:2px solid var(--edge);background:transparent;color:var(--ink);min-width:200px"><span class="cnt">顯示 ${list.length}／${total} 處</span></div>
-   <div class="tbl"><table><thead><tr>${th("ot","鄉鎮")}${th("n","營地")}${th("alt","海拔／夜寒")}</tr></thead><tbody>
-   ${list.map(d=>`<tr><td style="width:130px"><span class="town">${d.ot||"—"}</span></td><td><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.q)}" target="_blank" rel="noopener">${d.n}</a>${d.src?`<span class="osm" title="資料來源：OpenStreetMap">OSM</span>`:""}</td><td class="altc">${d.alt==null?"—":fmt(d.alt)+"m"}${(c=>c?`<span class="cold" title="依海拔估算，比平地低約 ${c.d}°C">${"❄".repeat(c.lv)||"☀"} ${c.d?`約-${c.d}°C`:"平地"}</span>`:"")(cold(d.alt))}</td></tr>`).join("")||'<tr><td colspan="3" style="text-align:center;color:var(--muted)">沒有符合條件的營地</td></tr>'}
-   </tbody></table></div>`;
-  document.querySelectorAll("#detail th[data-k]").forEach(el=>el.onclick=()=>{const k=el.dataset.k;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1}drawDetail()});
-  const q=document.getElementById("q");q.oninput=()=>{Q=q.value.trim();const pos=q.selectionStart;drawDetail();const q2=document.getElementById("q");q2.focus();q2.setSelectionRange(pos,pos)};
+   <div class="filters"><span style="color:var(--muted)">搜尋：</span><input id="q" type="search" autocomplete="off" placeholder="營地或鄉鎮名稱" style="font:inherit;font-size:13px;padding:4px 8px;border-radius:4px;border:2px solid var(--edge);background:transparent;color:var(--ink);min-width:200px"><span class="cnt"></span></div>
+   <div class="tbl"><table><thead><tr>${th("ot","鄉鎮")}${th("n","營地")}${th("alt","海拔／夜寒")}</tr></thead><tbody></tbody></table></div>`;
+  document.querySelectorAll("#detail th[data-k]").forEach(el=>el.onclick=()=>{const k=el.dataset.k;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1}drawRows()});
+  const q=document.getElementById("q");q.value=Q;let comp=false;
+  q.addEventListener("compositionstart",()=>comp=true);
+  q.addEventListener("compositionend",()=>{comp=false;Q=q.value.trim();drawRows()});
+  q.addEventListener("input",e=>{if(comp||e.isComposing)return;Q=q.value.trim();drawRows()});
+  drawRows();
 }
 function select(c,fromBar){selected=c;Q="";drawMap();drawBars();drawDetail();if(!hoverOK&&!fromBar){document.getElementById("info").scrollIntoView({behavior:"smooth",block:"nearest"})}}
 select(selected,true);
