@@ -187,6 +187,12 @@ td.stc{width:84px}.stm{display:none}
 .qcard .ln{font-size:13.5px;line-height:1.8;color:var(--ink2)}.qcard .ln b{color:var(--ink);font-weight:400}
 .qcard .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.qcard .acts a,.qcard .acts button{font:inherit;font-size:13px;padding:4px 10px;border-radius:4px;border:2px solid var(--edge);color:var(--ink);background:transparent;text-decoration:none;cursor:pointer}
 .qempty{color:var(--muted);font-size:13.5px;padding:10px 0}
+/* ===== 隱藏魔物 ===== */
+.hcard{padding:14px;border:2px dashed var(--edge);border-radius:6px;display:flex;gap:12px;align-items:flex-start}.hcard canvas{width:64px;height:64px;image-rendering:pixelated;flex:none;object-fit:contain}
+.hcard.lock canvas{filter:brightness(0) opacity(.55)}.hcard h3{margin:0;font-size:16px;font-weight:400;color:#ffd75e}.hcard.lock h3{color:var(--muted)}
+.hcard .hint{font-size:13px;color:#9fd3ff;margin-top:4px}.hcard .ds{font-size:13px;line-height:1.7;color:var(--ink2);margin-top:4px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(140%);z-index:50;display:flex;gap:12px;align-items:center;padding:12px 16px;background:#0d1033;border:3px solid #ffd75e;border-radius:6px;box-shadow:0 0 0 3px #0d1033,0 8px 24px #0008;transition:transform .25s steps(5);max-width:92vw}
+.toast.on{transform:translateX(-50%) translateY(0)}.toast canvas{width:48px;height:48px;image-rendering:pixelated;object-fit:contain}.toast b{color:#ffd75e;font-weight:400;display:block;font-size:13px}.toast span{font-size:15px}
 /* ===== 魔物 ===== */
 .mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
 .mcard{padding:14px;position:relative}.mcard .hd{display:flex;gap:12px;align-items:center}.mcard canvas{width:64px;height:64px;image-rendering:pixelated;flex:none}
@@ -318,6 +324,9 @@ footer,footer .sig{color:#c9cdf2}
   <div class="banner"><canvas id="sp-dragon" width="16" height="16" style="width:72px;height:72px"></canvas>
     <div class="say menu"><b>老獵人</b>：島上的營地雖然美，但草叢、林間和溪邊都藏著魔物。先認清牠們的習性，做好防具，才能平安回來！標示「本月活躍」的要特別小心。</div></div>
   <div class="mgrid" id="mgrid"></div>
+  <div class="scrollp" style="margin-top:16px"><div class="ttl">隱藏魔物 <span id="hcnt" style="font-size:14px;color:var(--muted)"></span></div>
+    <p class="sub">傳說中只在特定條件下現身的魔物。每隻都留有一句線索，找到牠們吧！</p>
+    <div class="mgrid" id="hgrid" style="margin-top:10px"></div></div>
   <div class="scrollp note"><h3>📜 魔物須知</h3><ul>
     <li>本頁整理自衛生福利部疾病管制署、各地衛生與動物保護單位及醫療院所的公開衛教資訊，季節為大致趨勢，實際會因地區與氣候而不同。</li>
     <li>本頁只是衛教整理，不能代替醫療；被咬傷、螫傷或出現發燒等症狀，請儘速就醫並告知醫師戶外活動史，緊急時撥打 119。</li>
@@ -385,6 +394,9 @@ const SPR={
  hydra:["..bBb...",".bBbBb..","bBbBbBb.",".bBbBbBb","..bBbBb.","...bBb..","....G...","...GG..."],
  galaxy:["...y....","...y....","..yyy...","yyywyyy.","..yyy...","...y....","...y....","........"],
  flag:["kr......","krrr....","krrrrr..","krrr....","kr......","k.......","k.......","kk......"],
+ peg:["................",".......kk.......","......kHHk......",".....kHhhHk.....",".....khwhwk.....",".....khkhkk.....",".....kHhhHk.....",".....kHrrHk.....","......kHHk......","......khHk......","......khHk......","......khHk......",".......kk.......",".......kk.......","........k.......","................"],
+ cloud:["................","......kkkk......","....kkhhhhkk....","...khhhhhhhhk...","..khhhwhhwhhhk..",".khhhhkhhkhhhhk.",".khhhhhhhhhhhhk.",".khhhhhkkhhhhhk.","..kkkkkkkkkkkk..","....b...b...b...","...b...b...b....","......b...b...b.",".....b...b...b..","................","................","................"],
+ mattress:["................","................","...kkkkkkkkkk...","..kbbbbbbbbbbk..","..kbwbbwbbwbbk..","..kbbbbbbbbbbk..","..kbbekbbekbbk..","..kbbbbbbbbbbk..","..kbbbkkkkbbbk..","...kbbbbbbbbk...","....kkbbbbkk.w..","......kbbk..w.w.",".......kk....w..","................","................","................"],
  tree:["....kk....","...kGGk...","..kGgGGk..","..kGGgGk..",".kGgGGgGk.",".kGGGgGGk.","kGgGGGgGGk","kkkkGGkkkk","....kn....","....kk...."]
 };
 function draw(cv,spr,scale){const g=cv.getContext("2d");const rows=SPR[spr];cv.width=rows[0].length;cv.height=rows.length;g.clearRect(0,0,cv.width,cv.height);rows.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!=="."){g.fillStyle=PAL[ch];g.fillRect(x,y,1,1)}}))}
@@ -564,7 +576,7 @@ function drawQuest(d){
    <div class="acts"><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.q)}" target="_blank" rel="noopener">▶ 前往（Google 地圖）</a><button id="qDone">${DONE.has(d.id)?"⚑ 已攻略":"□ 完成任務，標記已攻略"}</button><button id="qAgain">🎲 再抽一次</button></div></div></div>`;
   draw(document.getElementById("qsp"),sp);
   document.getElementById("qDone").onclick=()=>{toggleDone(d.id);drawQuest(d)};
-  document.getElementById("qAgain").onclick=roll;
+  document.getElementById("qAgain").onclick=()=>roll();
 }
 function roll(){
   const area=document.getElementById("qArea").value,alt=document.getElementById("qAlt").value,nw=document.getElementById("qNew").checked;
@@ -573,7 +585,7 @@ function roll(){
   if(nw)pool=pool.filter(d=>!DONE.has(d.id));
   drawQuest(pool.length?pool[Math.floor(Math.random()*pool.length)]:null);
 }
-document.getElementById("qGo").onclick=roll;
+document.getElementById("qGo").onclick=()=>roll();
 document.querySelector('#qArea option[value="sel"]').textContent="目前選取的地區";
 /* ---- 瀏覽次數（只在 GitHub Pages 上計數）---- */
 (async()=>{const h=location.hostname;if(!/github\.io$/.test(h))return;
@@ -582,6 +594,36 @@ document.querySelector('#qArea option[value="sel"]').textContent="目前選取�
   try{const r=await fetch(`${base}/${seen?"get":"hit"}/${ns}/${key}`);if(!r.ok)return;const j=await r.json();if(typeof j.value!=="number")return;
     try{sessionStorage.setItem("hcmap_seen","1")}catch(e){}
     const el=document.getElementById("visits");el.textContent=`👣 冒險者造訪 ${fmt(j.value)} 次`;el.style.display="inline"}catch(e){}})();
+/* ---- 隱藏魔物 ---- */
+const HID=[
+ {id:"peg",s:"peg",n:"營釘吞噬者",h:"勇者踏出第一步時，牠也跟著醒來……",d:"專門在收帳時吃掉最後一根營釘。數了三遍還是少一根？就是牠幹的。對策：營釘綁上螢光繩，收帳前先點名。"},
+ {id:"snore",s:"dragon",pal:{g:"p",G:"m",l:"w"},n:"鄰帳打呼龍",h:"命運之神被打擾太多次，就會吵醒牠。",d:"半夜在隔壁帳篷發出雷鳴般的吼聲，威力隨啤酒量增加。對策：耳塞是勇者的必備防具，營位選離熱門區遠一點。"},
+ {id:"rain",s:"cloud",n:"雨神之子",h:"在梅雨的季節裡，牠會跟著你。",d:"只要你排好假、訂好營位就會出現，收帳那天一定放晴。對策：帶好天幕與防水布，乾燥的換洗衣物裝夾鏈袋。"},
+ {id:"octo",s:"octo",n:"海峽觸手王",h:"苗栗外海的那位，似乎不喜歡被一直戳。",d:"其實就是地圖上那隻大章魚，被戳三次後會揭露真面目。據說牠也想上岸露營，只是找不到搭得下八隻腳的帳篷。"},
+ {id:"air",s:"mattress",n:"夜半漏氣魔",h:"只在夜深人靜（晚上 11 點到清晨 5 點）時現身。",d:"半夜三點偷偷放掉充氣床墊的氣，讓你在地上醒來。對策：出發前先在家打氣測試一晚，帶好修補貼片。"}];
+let FOUND=new Set();try{FOUND=new Set(JSON.parse(localStorage.getItem("hcmap_hidden")||"[]"))}catch(e){}
+function drawPal(cv,spr,pal){draw(cv,spr);if(!pal)return;const g=cv.getContext("2d");const rows=SPR[spr];rows.forEach((row,y)=>[...row].forEach((ch,x)=>{if(pal[ch]){g.fillStyle=PAL[pal[ch]];g.fillRect(x,y,1,1)}}))}
+function drawHidden(){
+  document.getElementById("hcnt").textContent=`（已發現 ${FOUND.size}／${HID.length}）`;
+  document.getElementById("hgrid").innerHTML=HID.map((x,i)=>{const f=FOUND.has(x.id);return `<div class="hcard${f?"":" lock"}"><canvas id="hc${i}" width="16" height="16"></canvas><div><h3>${f?x.n:"？？？"}</h3><div class="hint">💡 ${x.h}</div>${f?`<div class="ds">${x.d}</div>`:""}</div></div>`}).join("");
+  HID.forEach((x,i)=>drawPal(document.getElementById("hc"+i),x.s,x.pal));
+}
+let toastT;function unlock(id){if(FOUND.has(id))return;const x=HID.find(h=>h.id===id);FOUND.add(id);try{localStorage.setItem("hcmap_hidden",JSON.stringify([...FOUND]))}catch(e){}drawHidden();
+  let t=document.getElementById("toast");if(!t){t=document.createElement("div");t.id="toast";t.className="toast";t.setAttribute("role","status");document.body.appendChild(t)}
+  t.innerHTML=`<canvas id="tcv" width="16" height="16"></canvas><div><b>✦ 發現隱藏魔物！（${FOUND.size}／${HID.length}）</b><span>${x.n}</span></div>`;drawPal(document.getElementById("tcv"),x.s,x.pal);
+  t.onclick=()=>{showView("mon");t.classList.remove("on")};t.style.cursor="pointer";
+  requestAnimationFrame(()=>t.classList.add("on"));clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("on"),4200)}
+// 1 營釘：第一次攻略
+const _toggle=toggleDone;toggleDone=function(id){_toggle(id);if(DONE.size>0)unlock("peg")};
+// 2 打呼龍：抽籤 5 次
+let rolls=0;const _roll=roll;roll=function(){_roll();if(++rolls>=5)unlock("snore")};
+// 3 雨神：季節事件選 5 或 6 月
+document.getElementById("season").addEventListener("click",e=>{const b=e.target.closest("button[data-m]");if(b&&(b.dataset.m==="5"||b.dataset.m==="6"))unlock("rain")});
+// 4 章魚：戳三次
+let pokes=0;d3.selectAll(".octo").style("cursor","pointer").on("click",function(){pokes++;d3.select(this).select("image").attr("transform","translate(0,-4)").transition().duration(150).attr("transform",null);if(pokes>=3)unlock("octo")});
+// 5 漏氣魔：深夜造訪
+{const hr=NOW.getHours();if(hr>=23||hr<5)setTimeout(()=>unlock("air"),1500)}
+drawHidden();
 drawSeason();drawHero();
 select(selected,true);
 
