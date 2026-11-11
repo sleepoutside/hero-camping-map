@@ -285,6 +285,7 @@ footer,footer .sig{color:#c9cdf2}
       <li><b>冒險足跡</b>：勾選「已攻略」的紀錄只存在你這台裝置的瀏覽器裡，不會上傳；換裝置、清除瀏覽資料或用無痕模式時不會保留。</li>
       <li><b>觀星指數</b>：依營地與主要城市的距離估算光害，再依海拔加分，分 1–5 顆星，是相對的概略比較，不是實測的夜空亮度；實際還要看雲量與天氣。月相依天文公式推算。</li>
       <li><b>季節事件</b>：花期、螢火蟲等時間每年會隨氣候提早或延後，地點為代表性地區，出發前請查詢當地最新花況。</li>
+      <li><b>瀏覽次數</b>：頁尾的造訪次數由免費計數服務 Abacus 記錄，只計算次數，同一次瀏覽重新整理不重複計算。</li>
       <li>營地資訊可能隨時變動，訂位、價格與開放狀況請以各營地官方公告為準。</li>
     </ul>
   </div>
@@ -324,7 +325,7 @@ footer,footer .sig{color:#c9cdf2}
   </ul></div>
 </section>
 </div>
-<footer><span>資料來源：網路（部分營地 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:inherit">OpenStreetMap</a> 貢獻者）　｜　資訊僅供參考，請依官方資訊為準</span><span class="sig">設計／Sleepoutside Camp　*非營利使用</span></footer>
+<footer><span>資料來源：網路（部分營地 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:inherit">OpenStreetMap</a> 貢獻者）　｜　資訊僅供參考，請依官方資訊為準</span><span class="sig"><span id="visits" style="display:none;margin-right:14px"></span>設計／Sleepoutside Camp　*非營利使用</span></footer>
 <div class="tip" id="tip"></div>
 
 <script>
@@ -574,6 +575,13 @@ function roll(){
 }
 document.getElementById("qGo").onclick=roll;
 document.querySelector('#qArea option[value="sel"]').textContent="目前選取的地區";
+/* ---- 瀏覽次數（只在 GitHub Pages 上計數）---- */
+(async()=>{const h=location.hostname;if(!/github\.io$/.test(h))return;
+  const base="https://abacus.jasoncameron.dev",ns="sleepoutside-hero-camping-map",key="visits";
+  let seen=false;try{seen=sessionStorage.getItem("hcmap_seen")==="1"}catch(e){}
+  try{const r=await fetch(`${base}/${seen?"get":"hit"}/${ns}/${key}`);if(!r.ok)return;const j=await r.json();if(typeof j.value!=="number")return;
+    try{sessionStorage.setItem("hcmap_seen","1")}catch(e){}
+    const el=document.getElementById("visits");el.textContent=`👣 冒險者造訪 ${fmt(j.value)} 次`;el.style.display="inline"}catch(e){}})();
 drawSeason();drawHero();
 select(selected,true);
 
