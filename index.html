@@ -23,7 +23,7 @@ a{color:inherit}
 /* ---------- sticky header ---------- */
 .top{position:sticky;top:0;z-index:20;background:linear-gradient(#3b2f22,#2c2219);color:#f6e7c0;border-bottom:4px solid #1d160f;box-shadow:0 3px 0 #b98d4e,0 6px 12px #0004}
 .top .in{max-width:1180px;margin:0 auto;padding:8px 16px 0;display:flex;flex-wrap:wrap;align-items:flex-end;gap:6px 18px}
-.brand{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.brand{display:inline-flex;align-items:center;gap:10px;margin-bottom:6px}.brand:hover h1{color:#fff3c4}.brand:focus-visible{outline:2px solid #ffd75e;outline-offset:3px}
 .brand h1{margin:0;font-size:22px;font-weight:400;letter-spacing:.04em;color:#ffd978;text-shadow:2px 2px 0 #000}
 .brand h1 small{font-size:14px;color:#f6e7c0;margin-left:4px}
 .brand canvas{image-rendering:pixelated}
@@ -238,7 +238,7 @@ footer,footer .sig{color:#c9cdf2}
 </style></head>
 <body>
 <div class="top"><div class="in">
-  <div class="brand"><canvas id="sp-tent" width="16" height="16" style="width:32px;height:32px"></canvas><h1>勇者露營‧世界地圖<small>（福爾摩莎島篇）</small></h1></div>
+  <a class="brand" id="home" href="#fee" title="回首頁" style="color:inherit;text-decoration:none;cursor:pointer"><canvas id="sp-tent" width="16" height="16" style="width:32px;height:32px"></canvas><h1>勇者露營‧世界地圖<small>（福爾摩莎島篇）</small></h1></a>
   <div class="chap"><span class="on">福爾摩莎島篇</span><span class="off" title="敬請期待">日本篇 · 敬請期待</span></div>
   <div class="tabs" id="tabs">
     <button data-v="fee" class="on">營地情報</button>
@@ -410,6 +410,7 @@ function spriteURI(s,px){const rows=SPR[s];let r="";rows.forEach((row,y)=>[...ro
 /* ---------------- tabs ---------------- */
 function showView(v){document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));document.querySelectorAll(".view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));try{history.replaceState(null,"","#"+v)}catch(e){}window.scrollTo({top:0})}
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>showView(b.dataset.v));
+document.getElementById("home").onclick=e=>{e.preventDefault();showView("fee")};
 if(["fee","forest","mon"].includes(location.hash.slice(1)))showView(location.hash.slice(1));
 
 /* ---------------- data ---------------- */
