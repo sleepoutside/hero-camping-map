@@ -397,6 +397,10 @@ const SPR={
  peg:["................",".......kk.......","......kHHk......",".....kHhhHk.....",".....khwhwk.....",".....khkhkk.....",".....kHhhHk.....",".....kHrrHk.....","......kHHk......","......khHk......","......khHk......","......khHk......",".......kk.......",".......kk.......","........k.......","................"],
  cloud:["................","......kkkk......","....kkhhhhkk....","...khhhhhhhhk...","..khhhwhhwhhhk..",".khhhhkhhkhhhhk.",".khhhhhhhhhhhhk.",".khhhhhkkhhhhhk.","..kkkkkkkkkkkk..","....b...b...b...","...b...b...b....","......b...b...b.",".....b...b...b..","................","................","................"],
  mattress:["................","................","...kkkkkkkkkk...","..kbbbbbbbbbbk..","..kbwbbwbbwbbk..","..kbbbbbbbbbbk..","..kbbekbbekbbk..","..kbbbbbbbbbbk..","..kbbbkkkkbbbk..","...kbbbbbbbbk...","....kkbbbbkk.w..","......kbbk..w.w.",".......kk....w..","................","................","................"],
+ owner:["......YYYY......","....YYyyyyYY....","...kkkkkkkkkk...","....kssssssk....","....kkksskkk....","....kssssssk...w","....kssnnssk..w.",".....kssssk..w..","...kkggggggkk...","..kggggggggggk..","..ksggggggggsk..","...kggggggggk...","....kGGkkGGk....","....knnk.knnk...","....kkkk.kkkk...","................"],
+ karen:["................",".....eeeeee.....","....eeeeeeee....","....kssssssk....","....kkssskkk....","....ksessesk....","....ksssssskk...",".....ksrrsk..ks.","...kkooooookkks.","..koooooooook...","..ksoooooook....","...kooooook.....","....kOOkkOOk....","....knnk.knnk...","....kkkk.kkkk...","................"],
+ noisy:["................","......eeee......",".....eeeeee.....","....kssssssk....","....ksessesk....","....ksssssskhh.w","....kssrrsskhhw.","....kssssskhhh.w",".....kssssk.hh..","...kkppppppkk...","..kppppppppppk..","..kspppppppsk...","...kpppppppk....","....kmmkkmmk....","....knnk.knnk...","....kkkk.kkkk..."],
+ muntjac:["................","....k.k.........","...kNkNk........","...knnnk........","..knnennk.......","..knnnnnk.......","..kkkknnnkkkkkk.","......knnnnnnnnk",".....knnnnnnnnnk",".....knnnnnnnnk.",".....kcnnnnnnck.","......kn.kn.knk.","......kn.kn..kn.","......kk.kk..kk.","................","................"],
  tree:["....kk....","...kGGk...","..kGgGGk..","..kGGgGk..",".kGgGGgGk.",".kGGGgGGk.","kGgGGGgGGk","kkkkGGkkkk","....kn....","....kk...."]
 };
 function draw(cv,spr,scale){const g=cv.getContext("2d");const rows=SPR[spr];cv.width=rows[0].length;cv.height=rows.length;g.clearRect(0,0,cv.width,cv.height);rows.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!=="."){g.fillStyle=PAL[ch];g.fillRect(x,y,1,1)}}))}
@@ -552,6 +556,7 @@ const MON=[
  {s:"midge",n:"小黑蚊",sci:"台灣鋏蠓",dg:2,m:[3,4,5,6,7,8,9,10],w:"低海拔山腳的竹林、茶園、庭園等潮濕長青苔處，南投、台中、花蓮等地較多",se:"春雨後大量繁殖，暑假數量最多",f:"只在白天吸血，太陽下山就停；飛行高度多在 1 公尺以下，專咬小腿與手肘；不傳染疾病但奇癢無比",c:"穿長袖長褲（口器短，咬不穿衣物），裸露處塗防蚊液，避開中午前後的吸血高峰"},
  {s:"leech",n:"山螞蝗",sci:"陸生水蛭",dg:1,m:[4,5,6,7,8,9],w:"中低海拔潮濕森林、溪邊落葉層",se:"雨後與梅雨季最活躍",f:"從鞋襪縫隙爬上來吸血，傷口會流血一陣子，通常沒有大礙",c:"長褲紮進襪子、鞋襪噴防蚊液；被吸住時不要硬扯，可用鹽或酒精讓牠自己脫落，再清潔傷口"},
  {s:"beetle",n:"隱翅蟲",sci:"毒隱翅蟲",dg:2,m:[5,6,7,8,9,10],w:"田野、草地與水邊，晚上會被燈光吸引",se:"夏秋較多",f:"本身不咬人，但被拍死時體液會讓皮膚紅腫起水泡",c:"看到別拍打，用吹氣或紙輕輕撥走；碰到後用肥皂和清水沖洗；營燈放遠一點，別掛在帳篷門口"},
+ {s:"muntjac",n:"山羌",sci:"台灣特有亞種的小型鹿",dg:1,m:[1,2,3,4,5,6,7,8,9,10,11,12],w:"全島中低海拔的森林與林道旁，很多山區營地附近都有",se:"全年都有，清晨、黃昏與夜間最常出現",f:"受驚或警戒時會發出像狗吠一樣的「汪！」叫聲，半夜在帳篷裡聽到常被誤會是野狗；個性膽小，不會攻擊人",c:"聽到吠聲不用驚慌，安靜欣賞就好；不要餵食或靠近，食物收好；夜間開車上下山放慢速度，小心牠突然衝出馬路"},
  {s:"bear",n:"台灣黑熊",sci:"保育類野生動物",dg:4,m:[],w:"中高海拔山區森林",se:"全年，但很少遇到",f:"數量稀少，通常會主動避開人類；會被食物氣味吸引",c:"食物與垃圾密封收好；行進時發出聲響；遇到時保持距離慢慢後退，不要奔跑、靠近或餵食"}];
 const MNOW=NOW.getMonth()+1;
 document.getElementById("mgrid").innerHTML=MON.map((x,i)=>`<div class="scrollp mcard">${x.m.includes(MNOW)?'<span class="act">本月活躍</span>':""}<div class="hd"><canvas id="mc${i}" width="16" height="16"></canvas><div><h3>${x.n}</h3><div class="sci">${x.sci}</div><div class="dg">危險度 ${"★".repeat(x.dg)}${"☆".repeat(5-x.dg)}</div></div></div>
@@ -600,6 +605,9 @@ const HID=[
  {id:"snore",s:"dragon",pal:{g:"p",G:"m",l:"w"},n:"鄰帳打呼龍",h:"命運之神被打擾太多次，就會吵醒牠。",d:"半夜在隔壁帳篷發出雷鳴般的吼聲，威力隨啤酒量增加。對策：耳塞是勇者的必備防具，營位選離熱門區遠一點。"},
  {id:"rain",s:"cloud",n:"雨神之子",h:"在梅雨的季節裡，牠會跟著你。",d:"只要你排好假、訂好營位就會出現，收帳那天一定放晴。對策：帶好天幕與防水布，乾燥的換洗衣物裝夾鏈袋。"},
  {id:"octo",s:"octo",n:"海峽觸手王",h:"苗栗外海的那位，似乎不喜歡被一直戳。",d:"其實就是地圖上那隻大章魚，被戳三次後會揭露真面目。據說牠也想上岸露營，只是找不到搭得下八隻腳的帳篷。"},
+ {id:"owner",s:"owner",n:"不管理的營主",h:"勇者發呆太久，有人也跟著不見了……",d:"報到時找不到人，廁所沒衛生紙、熱水只剩冷水，打電話永遠在「等一下過去」。對策：出發前先看近期評價，問清楚報到方式與設施狀況。"},
+ {id:"karen",s:"karen",n:"奧客露友",h:"反覆無常、改來改去的人，總會引來牠。",d:"搶別人的營位、占用公共水槽洗整晚的碗，還一直跟營主討價還價。對策：遠離衝突，有問題交給營主處理；也提醒自己別變成牠。"},
+ {id:"noisy",s:"noisy",n:"吵鬧露友",h:"在世界地圖上到處亂竄，就會被牠的聲音找到。",d:"帶著音響與麥克風，過了 22 點還在大合唱。對策：選擇有明訂寧靜時間的營地，必要時請營主出面；自己也記得降低音量。"},
  {id:"air",s:"mattress",n:"夜半漏氣魔",h:"只在夜深人靜（晚上 11 點到清晨 5 點）時現身。",d:"半夜三點偷偷放掉充氣床墊的氣，讓你在地上醒來。對策：出發前先在家打氣測試一晚，帶好修補貼片。"}];
 let FOUND=new Set();try{FOUND=new Set(JSON.parse(localStorage.getItem("hcmap_hidden")||"[]"))}catch(e){}
 function drawPal(cv,spr,pal){draw(cv,spr);if(!pal)return;const g=cv.getContext("2d");const rows=SPR[spr];rows.forEach((row,y)=>[...row].forEach((ch,x)=>{if(pal[ch]){g.fillStyle=PAL[pal[ch]];g.fillRect(x,y,1,1)}}))}
@@ -621,6 +629,12 @@ let rolls=0;const _roll=roll;roll=function(){_roll();if(++rolls>=5)unlock("snore
 document.getElementById("season").addEventListener("click",e=>{const b=e.target.closest("button[data-m]");if(b&&(b.dataset.m==="5"||b.dataset.m==="6"))unlock("rain")});
 // 4 章魚：戳三次
 let pokes=0;d3.selectAll(".octo").style("cursor","pointer").on("click",function(){pokes++;d3.select(this).select("image").attr("transform","translate(0,-4)").transition().duration(150).attr("transform",null);if(pokes>=3)unlock("octo")});
+// 6 營主：發呆 60 秒
+let idleT;const idleReset=()=>{clearTimeout(idleT);idleT=setTimeout(()=>unlock("owner"),60000)};["pointerdown","keydown","scroll","touchstart"].forEach(ev=>addEventListener(ev,idleReset,{passive:true}));idleReset();
+// 7 奧客：同一個營地反覆切換已攻略 4 次
+const flips={};const _toggle2=toggleDone;toggleDone=function(id){_toggle2(id);flips[id]=(flips[id]||0)+1;if(flips[id]>=4)unlock("karen")};
+// 8 吵鬧：選過 8 個不同地區
+const visited=new Set();const _select=select;select=function(c,fb){_select(c,fb);visited.add(c);if(visited.size>=8)unlock("noisy")};
 // 5 漏氣魔：深夜造訪
 {const hr=NOW.getHours();if(hr>=23||hr<5)setTimeout(()=>unlock("air"),1500)}
 drawHidden();
