@@ -418,7 +418,7 @@ if(["fee","forest","mon"].includes(location.hash.slice(1)))showView(location.has
 const CAMPS=PUB.map(r=>({c:r[0],ot:r[1],n:r[2],q:r[3],alt:r[4],src:r[5],st:r[6],id:r[0]+"|"+r[2]}));
 /* ---- 冒險足跡 ---- */
 let DONE=new Set();try{DONE=new Set(JSON.parse(localStorage.getItem("hcmap_done")||"[]"))}catch(e){}
-function saveDone(){try{localStorage.setItem("hcmap_done",JSON.stringify([...DONE]))}catch(e){}}
+function saveDone(){try{localStorage.setItem("hcmap_done",JSON.stringify([...DONE]))}catch(e){}cloudSave()}
 const TITLES=[[0,"見習冒險者"],[1,"新手勇者"],[5,"露營騎士"],[15,"流浪勇者"],[30,"營地征服者"],[60,"傳說中的勇者"],[100,"福爾摩莎之王"]];
 let onlyDone=false,resetArm=false;
 function doneIn(c){let n=0;for(const d of by.get(c)||[])if(DONE.has(d.id))n++;return n}
@@ -618,7 +618,7 @@ function drawHidden(){
   document.getElementById("hgrid").innerHTML=HID.map((x,i)=>{const f=FOUND.has(x.id);return `<div class="hcard${f?"":" lock"}"><canvas id="hc${i}" width="16" height="16"></canvas><div><h3>${f?x.n:"？？？"}</h3><div class="hint">💡 ${x.h}</div>${f?`<div class="ds">${x.d}</div>`:""}</div></div>`}).join("");
   HID.forEach((x,i)=>drawPal(document.getElementById("hc"+i),x.s,x.pal));
 }
-let toastT;function unlock(id){if(FOUND.has(id))return;const x=HID.find(h=>h.id===id);FOUND.add(id);try{localStorage.setItem("hcmap_hidden",JSON.stringify([...FOUND]))}catch(e){}drawHidden();
+let toastT;function unlock(id){if(FOUND.has(id))return;const x=HID.find(h=>h.id===id);FOUND.add(id);try{localStorage.setItem("hcmap_hidden",JSON.stringify([...FOUND]))}catch(e){}cloudSave();drawHidden();
   let t=document.getElementById("toast");if(!t){t=document.createElement("div");t.id="toast";t.className="toast";t.setAttribute("role","status");document.body.appendChild(t)}
   t.innerHTML=`<canvas id="tcv" width="16" height="16"></canvas><div><b>✦ 發現隱藏魔物！（${FOUND.size}／${HID.length}）</b><span>${x.n}</span></div>`;drawPal(document.getElementById("tcv"),x.s,x.pal);
   t.onclick=()=>{showView("mon");t.classList.remove("on")};t.style.cursor="pointer";
@@ -640,6 +640,24 @@ const visited=new Set();const _select=select;select=function(c,fb){_select(c,fb)
 // 5 漏氣魔：深夜造訪
 {const hr=NOW.getHours();if(hr>=23||hr<5)setTimeout(()=>unlock("air"),1500)}
 drawHidden();
+/* ---- 雲端存檔：在 Claude 頁面上把冒險紀錄存到個人的專屬資料區（只有自己看得到）---- */
+var CLOUD={ref:null,ready:false,busy:false,again:false,last:""};
+function cloudSave(){if(!CLOUD||!CLOUD.ready||!CLOUD.ref)return;const body={done:[...DONE].sort(),hidden:[...FOUND].sort()};const js=JSON.stringify(body);if(js===CLOUD.last)return;
+  if(CLOUD.busy){CLOUD.again=true;return}CLOUD.busy=true;
+  CLOUD.ref.set(body).then(()=>{CLOUD.last=js}).catch(e=>{if(e&&e.code==="invalid_argument")CLOUD.ready=false}).finally(()=>{CLOUD.busy=false;if(CLOUD.again){CLOUD.again=false;cloudSave()}})}
+(async()=>{try{
+  if(!window.claude||typeof window.claude.use!=="function")return;
+  const [db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);if(!db||!user)return;
+  const uid=await user.id();if(!uid)return;
+  const ref=db.doc("data/users/"+uid+"/progress");CLOUD.ref=ref;
+  const snap=await Promise.race([ref.get(),new Promise((_,rej)=>setTimeout(()=>rej({code:"timeout"}),10000))]);
+  const d=snap&&snap.exists?snap.data():null;
+  if(d){CLOUD.last=JSON.stringify({done:[...(d.done||[])].sort(),hidden:[...(d.hidden||[])].sort()});
+    (d.done||[]).forEach(x=>typeof x==="string"&&DONE.add(x));(d.hidden||[]).forEach(x=>typeof x==="string"&&HID.some(h=>h.id===x)&&FOUND.add(x));
+    try{localStorage.setItem("hcmap_done",JSON.stringify([...DONE]));localStorage.setItem("hcmap_hidden",JSON.stringify([...FOUND]))}catch(e){}
+    refreshDone();drawHidden()}
+  CLOUD.ready=true;cloudSave();
+}catch(e){}})();
 drawSeason();drawHero();
 select(selected,true);
 
