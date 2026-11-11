@@ -66,6 +66,7 @@ a{color:inherit}
   background:#78b6dc}
 #map,#map2{width:100%;height:auto;display:block}
 .county{stroke:#5b4a2c;stroke-width:.8;cursor:pointer}
+.octo image{animation:sway 3s steps(2) infinite}@keyframes sway{50%{transform:translateX(-2px) translateY(-2px)}}.sword image{animation:drop .35s steps(4) both}@keyframes drop{from{transform:translateY(-14px);opacity:0}to{transform:none;opacity:1}}@media (prefers-reduced-motion:reduce){.octo image,.sword image{animation:none}}
 .whale image{animation:bob 2.4s steps(2) infinite}@keyframes bob{50%{transform:translateY(-3px)}}@media (prefers-reduced-motion:reduce){.whale image{animation:none}}
 .coast{fill:none;stroke:#7d9be0;stroke-width:6;stroke-linejoin:miter;opacity:.9;shape-rendering:crispEdges}
 .county:hover{filter:brightness(1.08) saturate(1.1)}
@@ -316,6 +317,8 @@ const SPR={
  beetle:["................","................","................","......k..k......",".......kk.......","......keek......","......kkkk......",".....krrrrk.....",".....kRRRRk.....",".....kekkek.....","....kkkkkkkk....","....kekeekek....",".....krrrrk.....","......kRRk......",".......kk.......","................"],
  bear:["................","...kk......kk...","..kNNk....kNNk..","..kNeekkkkeeNk..","...keeeeeeeeek..","...keweeeewek...","...keeeeeeeek...","...keeennneek...","....keenkneek...","..kkkeeeeeeekkk.",".keeekecccekeeek",".keeekeeceekeeek","..kkkeeeeeeekkk.","....keek..keek..","....kkkk..kkkk..","................"],
  whale:["................","..kk........kk..",".khhk......khhk.",".khHhk....khHhk.","..kHHhk..khHHk..","...kHHhkkhHHk...","....kkHHHHkk....","......kHHk......","......kHHk......",".....kHHHHk.....","..w.wwkkkkww.w..",".w.ww.w..w.ww.w."],
+ octo:["........kkkkkk..........",".......kppppppk.........","......kpwwppppppk.......",".....kpwwpppppppk.......",".....kppppppppppk.......",".....kpkkpppkkppk.......",".....kpkwkppkwkpk.......",".....kppppppppppk.......","......kpppmmpppk........","...kk..kppppppk..kk.....","..kppk.kpkppkpk.kppk....","..kpk.kppkppkppk.kpk....","...kpkpk.kppk.kpkpk.....","....kpk.kpkkpk.kpk......","..w..k.kpk..kpk.k..w....",".w.ww.w.k....k.w.ww.w..."],
+ sword:["....kk....","...kyyk...","...knnk...","...knnk...",".kkknnkkk.","kyyyyyyyyk",".kkkkkkkk.","...kwhk...","...kwhk...","...kwhk...","...kwhk...","...kwhk...","...kwhk...","...kwhk...","...kwk....","....kk...."],
  tree:["....kk....","...kGGk...","..kGgGGk..","..kGGgGk..",".kGgGGgGk.",".kGGGgGGk.","kGgGGGgGGk","kkkkGGkkkk","....kn....","....kk...."]
 };
 function draw(cv,spr,scale){const g=cv.getContext("2d");const rows=SPR[spr];cv.width=rows[0].length;cv.height=rows.length;g.clearRect(0,0,cv.width,cv.height);rows.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!=="."){g.fillStyle=PAL[ch];g.fillRect(x,y,1,1)}}))}
@@ -356,10 +359,12 @@ function defs(svg,id){
   svg.append("rect").attr("width",W).attr("height",H).attr("fill",`url(#sea2-${id})`).attr("shape-rendering","crispEdges");
   const [wx,wy]=proj([121.9,23.55]);
   svg.append("g").attr("class","whale").attr("transform",`translate(${Math.round(wx)},${Math.round(wy)})`).append("image").attr("href","data:image/svg+xml;utf8,"+encodeURIComponent(spriteURI("whale"))).attr("width",44).attr("height",33).attr("x",-22).attr("y",-28).style("image-rendering","pixelated").append("title").text("花蓮外海的鯨魚");
+  const [ox,oy]=proj([120.33,24.6]);
+  svg.append("g").attr("class","octo").attr("transform",`translate(${Math.round(ox)},${Math.round(oy)})`).append("image").attr("href","data:image/svg+xml;utf8,"+encodeURIComponent(spriteURI("octo"))).attr("width",72).attr("height",48).attr("x",-36).attr("y",-24).style("image-rendering","pixelated").append("title").text("苗栗外海的大章魚");
 }
 const svg=d3.select("#map");defs(svg,"a");
 svg.append("path").datum(topojson.mesh(TOPO,TOPO.objects.counties,(a,b)=>a===b)).attr("d",path).attr("class","coast").attr("stroke-dasharray","4 3");
-const gC=svg.append("g"),gL=svg.append("g");const tip=document.getElementById("tip");
+const gC=svg.append("g"),gL=svg.append("g"),gS=svg.append("g").style("pointer-events","none");const SWORD="data:image/svg+xml;utf8,"+encodeURIComponent(spriteURI("sword"));const tip=document.getElementById("tip");
 function scale(){const st=["--g1","--g2","--g3","--g4","--g5","--g6"].map(css);return{th:[10,30,60,120,250],colors:st,lab:["<10","10","30","60","120","250+"]}}
 const val=s=>s?s.tot:null;
 const color=v=>{const sc=scale();return d3.scaleThreshold().domain(sc.th).range(sc.colors)(v)};
@@ -378,6 +383,8 @@ function drawMap(){
   feats.filter(".sel").raise();
   const lab=cents.filter(c=>hasData(c.n)&&(stats.get(c.n).tot>=10));
   gL.selectAll("text").data(lab,d=>d.n).join("text").attr("class","lbl").attr("text-anchor","middle").attr("x",d=>d.x).attr("y",d=>d.y+4).text(d=>OLD[d.n]+" "+stats.get(d.n).tot);
+  const sp=cents.find(c=>c.n===selected);
+  gS.selectAll("g").data(sp?[sp]:[],d=>d.n).join(en=>{const g=en.append("g").attr("class","sword");g.append("image").attr("href",SWORD).attr("width",20).attr("height",32).attr("x",-10).attr("y",-32).style("image-rendering","pixelated");return g}).attr("transform",d=>`translate(${Math.round(d.x)},${Math.round(d.y-8)})`);
   const sc=scale();
   document.getElementById("legend").innerHTML=`<span>營地數</span><span><span class="sw">${sc.colors.map(c=>`<span style="background:${c}"></span>`).join("")}</span><span class="ticks">${sc.lab.map(l=>`<span>${l}</span>`).join("")}</span></span><span><i class="nd"></i>未探索</span>`;
   document.getElementById("info").innerHTML=infoHTML(selected);
