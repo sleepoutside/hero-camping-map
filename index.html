@@ -204,6 +204,8 @@ td.stc{width:84px}.stm{display:none}
 @media (max-width:600px){td.stc,th.stc{display:none}.stm{display:block;margin-top:2px}.qcard{grid-template-columns:56px 1fr}.qcard canvas{width:56px;height:56px}.hbar{padding:8px 10px}}
 @media (prefers-reduced-motion:reduce){.evi image{animation:none}}
 </style>
+<script>/* GoatCounter 流量統計：只在 GitHub Pages 上載入 */
+if(/github\.io$/.test(location.hostname)){var gcs=document.createElement("script");gcs.async=true;gcs.src="https://gc.zgo.at/count.js";gcs.setAttribute("data-goatcounter","https://hero-camping-map.goatcounter.com/count");document.head.appendChild(gcs)}</script>
 <style>
 :root{--paper:#0d1033;--paper2:#141a4a;--paper3:#1a1e45;--edge:#6a72c9;--ink:#ffffff;--ink2:#c9cdf2;--muted:#8c91c4;--bar:#000;--bar2:#2b3170;--gold:#ffd75e;--red:#ffd75e;
  --g1:#4a2f0a;--g2:#77500f;--g3:#a87317;--g4:#d69a22;--g5:#f2bf3c;--g6:#ffe598;--nodata:#1a1e45}
@@ -291,7 +293,7 @@ footer,footer .sig{color:#c9cdf2}
       <li><b>冒險足跡</b>：勾選「已攻略」的紀錄只存在你這台裝置的瀏覽器裡，不會上傳；換裝置、清除瀏覽資料或用無痕模式時不會保留。</li>
       <li><b>觀星指數</b>：依營地與主要城市的距離估算光害，再依海拔加分，分 1–5 顆星，是相對的概略比較，不是實測的夜空亮度；實際還要看雲量與天氣。月相依天文公式推算。</li>
       <li><b>季節事件</b>：花期、螢火蟲等時間每年會隨氣候提早或延後，地點為代表性地區，出發前請查詢當地最新花況。</li>
-      <li><b>瀏覽次數</b>：頁尾的造訪次數由免費計數服務 Abacus 記錄，只計算次數，同一次瀏覽重新整理不重複計算。</li>
+      <li><b>瀏覽次數與流量統計</b>：頁尾的造訪次數由免費計數服務 Abacus 記錄；另以 GoatCounter 統計瀏覽頁面、來源網站、裝置與國家等匿名資料，不使用 Cookie，也不追蹤個人身分。</li>
       <li>營地資訊可能隨時變動，訂位、價格與開放狀況請以各營地官方公告為準。</li>
     </ul>
   </div>
@@ -408,7 +410,7 @@ function draw(cv,spr,scale){const g=cv.getContext("2d");const rows=SPR[spr];cv.w
 function spriteURI(s,px){const rows=SPR[s];let r="";rows.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!==".")r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${PAL[ch]}"/>`}));return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${rows[0].length} ${rows.length}" shape-rendering="crispEdges">${r}</svg>`}
 
 /* ---------------- tabs ---------------- */
-function showView(v){document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));document.querySelectorAll(".view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));try{history.replaceState(null,"","#"+v)}catch(e){}window.scrollTo({top:0})}
+let _lastView="fee";function showView(v){if(_lastView!==v){try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:location.pathname+"#"+v,title:"分頁："+v,event:false})}catch(e){}}_lastView=v;document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));document.querySelectorAll(".view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));try{history.replaceState(null,"","#"+v)}catch(e){}window.scrollTo({top:0})}
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>showView(b.dataset.v));
 {const h=document.getElementById("home");const go=e=>{if(e){e.preventDefault();e.stopPropagation()}showView("fee");try{document.scrollingElement.scrollTop=0;document.body.scrollTop=0}catch(_){}};
  h.addEventListener("click",go);h.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" ")go(e)})}
