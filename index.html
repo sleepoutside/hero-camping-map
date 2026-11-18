@@ -531,8 +531,10 @@ const WXQ="daily=weather_code,temperature_2m_max,temperature_2m_min,precipitatio
 async function wxFetch(pts){
   const q=k=>pts.map(p=>p[k]).join(",");const hasAlt=pts.every(p=>p.alt!=null);
   const u=`https://api.open-meteo.com/v1/forecast?latitude=${q("lat")}&longitude=${q("lon")}${hasAlt?`&elevation=${q("alt")}`:""}&${WXQ}`;
-  const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),15000);
-  const r=await fetch(u,{signal:ctl.signal});clearTimeout(tm);if(!r.ok){let why="";try{why=(await r.json()).reason||""}catch(_){}throw new Error("HTTP "+r.status+(why?" "+why:""))}
+  let r,lastErr;for(let k=0;k<2;k++){const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),k?25000:15000);
+    try{r=await fetch(u,{signal:ctl.signal});clearTimeout(tm);if(r.ok||r.status<500&&r.status!==429)break}catch(e){clearTimeout(tm);lastErr=e;r=null}
+    await new Promise(z=>setTimeout(z,1200))}
+  if(!r)throw lastErr||new Error("連線失敗");if(!r.ok){let why="";try{why=(await r.json()).reason||""}catch(_){}throw new Error("HTTP "+r.status+(why?" "+why:""))}
   let j=await r.json();if(!Array.isArray(j))j=[j];return j.map(parseWx)}
 function parseWx(x){
   const H=x.hourly,D=x.daily,byDate={};
@@ -550,7 +552,11 @@ function cacheGet(k){try{const c=JSON.parse(localStorage.getItem(k)||"null");if(
 function cacheSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 
 /* ---- 計算 ---- */
-function dayOf(T,dstr){const D=T.wx;if(!D)return null;const i=D.time.indexOf(dstr);if(i<0)return null;
+function cwaKind(c,w){c=+c;if(/雪/.test(w))return"snow";if(/雨/.test(w))return"rain";if(c<=1)return"sun";if(c<=3)return"pc";return"cloud"}
+function dayOfCWA(T,dstr){const c=cwaDay(T,dstr);if(!c||c.tmin==null)return null;const rows=CWA.towns[(T.c+T.t).replace(/臺/g,"台")];const row=rows.find(r=>r[0].startsWith(dstr)&&+r[0].slice(11,13)<18)||rows.find(r=>r[0].startsWith(dstr));
+  const lead=Math.round((new Date(dstr+"T12:00:00")-TODAY)/864e5);
+  return{k:cwaKind(row[2],c.wx),lab:c.wx,tmin:c.tmin,tmax:c.tmax,mm:null,pop:c.pop,gust:null,win:"",start:null,cwa:c,sunset:"",rhN:null,dew:null,fog:0,conf:lead<=1?0:lead<=3?1:2,only:true}}
+function dayOf(T,dstr){const D=T.wx;if(!D)return dayOfCWA(T,dstr);const i=D.time.indexOf(dstr);if(i<0)return null;
   const mm=D.mm[i]??0,[k,lab]=wkind(D.code[i],mm),E=D.ext[dstr]||{rain:[]};const hrs=E.rain;let win="";
   if(hrs.length)win=hrs.length>=14?"全日":`${pad(hrs[0])}–${pad(Math.min(24,hrs[hrs.length-1]+1))} 時`;
   const lead=Math.round((new Date(dstr+"T12:00:00")-TODAY)/864e5);
@@ -559,8 +565,8 @@ function dayOf(T,dstr){const D=T.wx;if(!D)return null;const i=D.time.indexOf(dst
     cwa:cwaDay(T,dstr),sunset:D.sunset&&D.sunset[i]?D.sunset[i].slice(11,16):"",rhN:E.rhN==null?null:Math.round(E.rhN),dew,fog:E.fog||0,conf:lead<=1?0:lead<=3?1:2}}
 function judge(T){
   let lv=0,score=100;const why=[];
-  T.days.forEach((d,i)=>{if(!d)return;const w=i===0?.6:1;score-=w*(d.mm*2.2+d.pop*.22+(d.gust>10?(d.gust-10)*4:0)+(d.tmin<5?(5-d.tmin)*3:0));
-    if(d.mm>=30){lv=2;why.push(`${DN[i]}大雨 ${d.mm}mm`)}else if(d.mm>=3||d.pop>=70){lv=Math.max(lv,1);why.push(`${DN[i]}有雨${d.win&&d.win!=="全日"?"（"+d.win.replace(" 時","時")+"）":""}`)}
+  T.days.forEach((d,i)=>{if(!d)return;const w=i===0?.6:1;score-=w*((d.mm||0)*2.2+(d.pop||0)*.22+(d.gust>10?(d.gust-10)*4:0)+(d.tmin<5?(5-d.tmin)*3:0));
+    if(d.mm>=30){lv=2;why.push(`${DN[i]}大雨 ${d.mm}mm`)}else if(d.mm>=3||(d.mm!=null&&d.pop>=70)||(d.only&&d.k==="rain")){lv=Math.max(lv,1);why.push(`${DN[i]}有雨${d.win&&d.win!=="全日"?"（"+d.win.replace(" 時","時")+"）":""}`)}
     if(d.cwa&&d.cwa.pop!=null&&d.cwa.pop>=70){lv=Math.max(lv,1);why.push(`氣象署：${DN[i]}降雨機率 ${d.cwa.pop}%`)}
     if(d.gust>=17){lv=2;why.push(`${DN[i]}強風 ${d.gust}m/s`)}else if(d.gust>=12){lv=Math.max(lv,1);why.push(`${DN[i]}陣風 ${d.gust}m/s`)}});
   const D=T.days.filter(Boolean);if(D.length){const tmin=Math.min(...D.map(d=>d.tmin));
@@ -602,9 +608,9 @@ function drawList(){
 /* ---- 建議 ---- */
 function equip(T){
   const D=T.days.filter(Boolean),out=[];if(!D.length)return out;
-  const rainy=T.days.map((d,i)=>d&&d.mm>=1?i:-1).filter(i=>i>=0);
+  const rainy=T.days.map((d,i)=>d&&(d.mm>=1||(d.only&&d.k==="rain"))?i:-1).filter(i=>i>=0);
   if(rainy.length){const d=T.days[rainy[0]];out.push(["天幕＋防水地布",`${rainy.map(i=>DN[i]).join("、")}有雨${d.win?`，${DN[rainy[0]]} ${d.win}較集中`:""}，炊事與集合都在天幕下`])}
-  const g=Math.max(...D.map(d=>d.gust));if(g>=10)out.push(["營繩拉緊、營釘打深",`陣風最大約 ${g} m/s（${bft(g)} 級），天幕放低並加拉營繩`]);
+  const gs=D.map(d=>d.gust).filter(v=>v!=null),g=gs.length?Math.max(...gs):0;if(g>=10)out.push(["營繩拉緊、營釘打深",`陣風最大約 ${g} m/s（${bft(g)} 級），天幕放低並加拉營繩`]);
   const tmin=Math.min(...D.map(d=>d.tmin));
   if(tmin<=5)out.push([`睡袋 ≤${tmin-3}°C＋保暖層`,`夜間低溫約 ${tmin}°C，注意失溫，暖暖包、毛帽一起帶`]);
   else if(tmin<=14)out.push([`睡袋 ≤${tmin-2}°C＋保暖外套`,`夜間低溫約 ${tmin}°C${T.alt!=null?`（海拔約 ${fmt(T.alt)}m）`:""}`]);
@@ -613,14 +619,14 @@ function equip(T){
   else if(rainy.length&&tmin<=16)out.push(["帳內保持通風","雨後夜間濕度高，容易結露"]);
   if(D.some(d=>d.fog>=4))out.push(["起霧注意","山路能見度低，開霧燈、放慢車速"]);
   const fr=T.days[0];if(fr&&fr.sunset)out.push(["趕在日落前搭好",`週五日落約 ${fr.sunset}，山區天黑得更早`]);
-  const sun=T.days[2];if(sun){if(sun.mm>=1)out.push(["準備濕收","週日有雨，帶大塑膠袋與抹布，回家後記得晾乾"]);else if(rainy.length)out.push(["週日乾收","週日轉乾，早上先把帳篷與地布晾乾再收"])}
+  const sun=T.days[2];if(sun){if(sun.mm>=1||(sun.only&&sun.k==="rain"))out.push(["準備濕收","週日有雨，帶大塑膠袋與抹布，回家後記得晾乾"]);else if(rainy.length)out.push(["週日乾收","週日轉乾，早上先把帳篷與地布晾乾再收"])}
   if(T.days[1]&&["sun","pc"].includes(T.days[1].k)&&MOONGOOD)out.push(["觀星好時機",`週六晚上是${MOON.name}，月光微弱`]);
   const m=MNOW;const foe=(rainy.length&&[4,5,6,7,8,9].includes(m))?MON.find(x=>x.n==="山螞蝗"):(T.alt!=null&&T.alt<1000?MON.find(x=>x.n==="小黑蚊"&&x.m.includes(m)):null)||MON.find(x=>x.n==="恙蟎"&&x.m.includes(m));
   if(foe)out.push([`魔物出沒：${foe.n}`,foe.c.split("；")[0]]);
   if(!out.length)out.push(["天氣穩定","一般裝備即可，早晚溫差記得帶件外套"]);
   return out.slice(0,7)}
-function dayTip(d,i,T){if(!d)return"";if(d.mm>=1){if(i===0&&d.start!=null&&d.start>=11)return`▶ ${pad(d.start-1)}:00 前搭好帳＋天幕`;if(i===2)return"▶ 準備濕收：大塑膠袋、抹布";return"▶ 雨天行程，注意營地排水"}
-  if(d.gust>=12)return"▶ 風大，天幕降低高度";const prev=i>0&&T.days[i-1];if(prev&&prev.mm>=1)return"▶ 早上晾乾帳篷與地布";if(i===2)return"▶ 適合乾收撤營";return"▶ 好天氣，適合戶外活動"}
+function dayTip(d,i,T){if(!d)return"";if(d.mm>=1||(d.only&&d.k==="rain")){if(i===0&&d.start!=null&&d.start>=11)return`▶ ${pad(d.start-1)}:00 前搭好帳＋天幕`;if(i===2)return"▶ 準備濕收：大塑膠袋、抹布";return"▶ 雨天行程，注意營地排水"}
+  if(d.gust>=12)return"▶ 風大，天幕降低高度";const prev=i>0&&T.days[i-1];if(prev&&(prev.mm>=1||(prev.only&&prev.k==="rain")))return"▶ 早上晾乾帳篷與地布";if(i===2)return"▶ 適合乾收撤營";return"▶ 好天氣，適合戶外活動"}
 const DEWL=["低","中","高"];
 
 /* ---- 冒險情報 ---- */
@@ -628,23 +634,25 @@ function titleOf(T){return T.kind==="camp"?T.name:hotName(T)}
 function subOf(T){return T.kind==="camp"?`${T.c}${T.t} · 海拔 ${T.alt!=null?fmt(T.alt)+"m":"不明"}${T.osm?" · OSM":""}`:`營地 ${T.n} 處 · 營地平均海拔 ${fmt(T.alt)}m · 熱點`}
 function drawIntel(){
   const el=document.getElementById("intel");const T=wxSel;if(!T)return;
-  if(!T.wx){const onSite=/github\.io$/.test(location.hostname);
+  if(!T.wx&&!(T.days&&T.days.some(Boolean))){const onSite=/github\.io$/.test(location.hostname);
     el.innerHTML=`<div class="rwin wxerr">${T.loading?"🔮 占卜中…":onSite?`🔮 水晶球看不到「${esc(titleOf(T))}」的天氣，可能是天氣服務暫時忙碌。 <button class="rbtn" id="wxRetry">再占卜一次</button><div style="font-size:12px;color:#9AA6D6;margin-top:6px">錯誤代碼：${esc(T.err||"")}</div>`:`🔮 這裡無法連線到天氣資料服務，請到正式網站查詢：<a href="${shareURL(T)}" target="_blank" rel="noopener">在正式網站打開「${esc(titleOf(T))}」</a>`}</div>`;
     const b=document.getElementById("wxRetry");if(b)b.onclick=()=>{T.wx=null;T.failed=false;openCamp(T.idx,false)};return}
   const lab=["FRI","SAT","SUN"];const al=alerts(T);
   el.innerHTML=`<h3><span class="px">INTEL</span>冒險情報 · ${esc(titleOf(T))}<small>${esc(subOf(T))}</small><span class="ibar"><button id="shareImg">📤 分享圖卡</button><button id="shareLink">🔗 複製連結</button></span></h3>
+  ${T.wx?"":`<div class="alert" style="background:#1e2a6b;border-color:#F2B233">目前只拿到氣象署的鄉鎮預報（Open-Meteo 暫時連不上），雨量、陣風、結露等數字先空著。${T.kind==="camp"?'<button class="rbtn" id="wxRetry2" style="margin-left:8px">再試一次</button>':""}</div>`}
   <div class="verdict"><span class="vd vd${T.lv}">${VDL[T.lv]}</span><span>${T.why.map(esc).join("、")}</span></div>
   ${al.length?`<div class="alert">⚠ ${al.join("；")}。這是依預報數字的提醒，請以氣象署發布的警特報為準。</div>`:""}
   <div class="offi">${CWA&&CWA.issued&&T.days.some(d=>d&&d.cwa)?`<span>氣象署鄉鎮預報 ${CWA.issued.slice(5,10).replace("-","/")} ${CWA.issued.slice(11,16)} 更新（${esc(T.c+T.t)}，以鄉鎮公所位置為準）·</span>`:""}<span>出發前再確認：</span><a href="https://www.cwa.gov.tw/" target="_blank" rel="noopener">中央氣象署（警特報）</a><a href="https://www.cwa.gov.tw/V8/C/P/Typhoon/TY_WARN.html" target="_blank" rel="noopener">颱風警報</a><a href="https://168.thb.gov.tw/" target="_blank" rel="noopener">公路局省道即時路況</a></div>
-  <div class="icards">${T.days.map((d,i)=>d?`<div class="rwin dcard"><div class="t"><span class="px" style="color:${WCOL[d.k][0]}">${lab[i]}</span><span>降雨機率 ${d.pop}%<span class="conf cf${d.conf}" title="預報可信度">可信度 ${CONF[d.conf]}</span></span></div>
+  <div class="icards">${T.days.map((d,i)=>d?`<div class="rwin dcard"><div class="t"><span class="px" style="color:${WCOL[d.k][0]}">${lab[i]}</span><span>${d.pop!=null?`降雨機率 ${d.pop}%`:""}<span class="conf cf${d.conf}" title="預報可信度">可信度 ${CONF[d.conf]}</span></span></div>
    <div class="big"><canvas data-s="${WICO[d.k]}"></canvas><div><b>週${WDN[WEEKEND[i].getDay()]} ${md(WEEKEND[i])}</b><span style="color:${WCOL[d.k][0]}">${d.lab}</span></div></div>
    ${d.cwa?`<div class="cwa"><b>氣象署</b>${esc(d.cwa.wx)} · ${d.cwa.tmin}–${d.cwa.tmax}°C${d.cwa.pop!=null?` · 降雨 ${d.cwa.pop}%`:""}</div>`:""}
-   <dl><dt>氣溫</dt><dd>${d.tmin}–${d.tmax}°C</dd><dt>雨量</dt><dd style="color:${d.mm>0?"#5FD0FF":"#fff"}">${d.mm} mm</dd><dt>降雨時段</dt><dd style="color:#5FD0FF">${d.win||"—"}</dd><dt>陣風</dt><dd>${d.gust} m/s（${bft(d.gust)} 級）</dd>
+   <dl><dt>氣溫</dt><dd>${d.tmin}–${d.tmax}°C</dd><dt>雨量</dt><dd style="color:${d.mm>0?"#5FD0FF":"#fff"}">${d.mm==null?"—":d.mm+" mm"}</dd><dt>降雨時段</dt><dd style="color:#5FD0FF">${d.win||"—"}</dd><dt>陣風</dt><dd>${d.gust==null?"—":`${d.gust} m/s（${bft(d.gust)} 級）`}</dd>
    <dt>夜間濕度</dt><dd>${d.rhN!=null?d.rhN+"%":"—"}</dd><dt>結露風險</dt><dd style="color:${d.dew===2?"#ff8f7a":d.dew===1?"#F2B233":"#fff"}">${d.dew!=null?DEWL[d.dew]:"—"}</dd><dt>起霧</dt><dd>${d.fog?`約 ${d.fog} 小時`:"—"}</dd><dt>日落</dt><dd>${d.sunset||"—"}</dd></dl>
    <div class="dtip">${dayTip(d,i,T)}</div></div>`:`<div class="rwin dcard"><div class="t"><span class="px">${lab[i]}</span></div><div style="padding:30px 0;color:#9AA6D6;text-align:center">已過去</div></div>`).join("")}
    <div class="rwin eqw"><div class="t"><span class="px">EQUIP</span><span>勇者裝備建議</span></div><ul>${equip(T).map(e=>`<li><b>${esc(e[0])}</b>${esc(e[1])}</li>`).join("")}</ul>
    <div class="week">${NEXT7.map(dt=>{const d=dayOf(T,iso(dt));const we=[5,6,0].includes(dt.getDay());return d?`<div class="wday${we?" we":""}" title="${md(dt)} ${d.lab} ${d.tmin}–${d.tmax}°C 雨量 ${d.mm}mm 可信度${CONF[d.conf]}">週${WDN[dt.getDay()]}<canvas data-s="${WICO[d.k]}"></canvas><b>${d.tmin}–${d.tmax}°</b></div>`:""}).join("")}</div></div></div>`;
   el.querySelectorAll("canvas[data-s]").forEach(c=>draw(c,c.dataset.s));
+  const r2=document.getElementById("wxRetry2");if(r2)r2.onclick=()=>{T.wx=null;openCamp(T.idx,false)};
   document.getElementById("shareImg").onclick=shareCard;document.getElementById("shareLink").onclick=copyLink;
 }
 
@@ -660,7 +668,7 @@ const CAMPOBJ=new Map();
 function campObj(i){if(CAMPOBJ.has(i))return CAMPOBJ.get(i);const r=CAMPW[i];if(!r)return null;const o={kind:"camp",idx:i,key:"c"+i,name:r[0],c:r[1],t:r[2],lat:r[3],lon:r[4],alt:r[5],osm:!!r[6]};CAMPOBJ.set(i,o);return o}
 async function openCamp(i,user){const T=campObj(i);if(!T)return;
   if(!T.wx){T.loading=true;selectT(T,user);const k=`hcmap_wxc_${T.lat},${T.lon}`;let c=cacheGet(k);
-    try{if(!c){const [w]=await wxFetch([T]);c={at:Date.now(),w};cacheSet(k,c)}T.wx=c.w;prep(T);T.err=""}catch(e){T.wx=null;T.err=(e&&(e.name==="AbortError"?"連線逾時":e.message))||"未知錯誤";try{console.warn("camp weather failed",e)}catch(_){}}T.loading=false}
+    try{if(!c){const [w]=await wxFetch([T]);c={at:Date.now(),w};cacheSet(k,c)}T.wx=c.w;prep(T);T.err=""}catch(e){T.wx=null;try{prep(T)}catch(_){}T.err=(e&&(e.name==="AbortError"?"連線逾時":e.message))||"未知錯誤";try{console.warn("camp weather failed",e)}catch(_){}}T.loading=false}
   if(wxSel===T||!wxSel)selectT(T,user)}
 
 /* ---- 搜尋 ---- */
@@ -700,7 +708,7 @@ function cardCanvas(T){
     txt(`${md(WEEKEND[i])}（${WDN[WEEKEND[i].getDay()]}）`,x+24,y+88,28);
     if(!d){txt("已過去",x+160,y+260,26,"#9AA6D6",F,700,"center");return}
     sprite(WICO[d.k],x+24,y+108,84);txt(d.lab,x+124,y+162,30,WCOL[d.k][0]);
-    const rows=[["氣溫",`${d.tmin}–${d.tmax}°C`],["雨量",`${d.mm} mm`],["降雨",d.win||"—"],["陣風",`${d.gust} m/s`],["結露",d.dew!=null?DEWL[d.dew]:"—"],["可信度",CONF[d.conf]]];if(d.cwa){let w=d.cwa.wx;if(w.length>6)w=w.slice(0,6)+"…";rows.push(["氣象署",w])}
+    const rows=[["氣溫",`${d.tmin}–${d.tmax}°C`],["雨量",d.mm==null?"—":`${d.mm} mm`],["降雨",d.win||"—"],["陣風",d.gust==null?"—":`${d.gust} m/s`],["結露",d.dew!=null?DEWL[d.dew]:"—"],["可信度",CONF[d.conf]]];if(d.cwa){let w=d.cwa.wx;if(w.length>6)w=w.slice(0,6)+"…";rows.push(["氣象署",w])}
     rows.forEach((r,k)=>{txt(r[0],x+24,y+250+k*38,23,"#DCE3FF",F,500);txt(r[1],x+296,y+250+k*38,23,"#fff",F,900,"right")})});
   win(40,870,1000,400);txt("EQUIP",72,920,20,"#FFE08A",P,400);txt("勇者裝備建議",1008,922,24,"#DCE3FF",F,700,"right");
   let yy=972;equip(T).slice(0,6).forEach(e=>{if(yy>1240)return;g.font=`900 25px ${F}`;g.fillStyle="#FFE08A";g.textAlign="left";g.fillText("▸ "+e[0],72,yy);const w=g.measureText("▸ "+e[0]).width;
@@ -709,7 +717,7 @@ function cardCanvas(T){
   txt(`資料 Open-Meteo · ${md(new Date(WXAT||Date.now()))} 更新 · 僅供參考`,1040,1318,15,"#9AA6D6",F,500,"right");
   return c}
 async function shareCard(){
-  const T=wxSel;if(!T||!T.wx)return;try{await document.fonts.ready}catch(e){}
+  const T=wxSel;if(!T||!(T.days&&T.days.some(Boolean)))return;try{await document.fonts.ready}catch(e){}
   const c=cardCanvas(T);const blob=await new Promise(r=>c.toBlob(r,"image/png"));const fn=`勇者露營天氣_${titleOf(T)}.png`;
   const file=new File([blob],fn,{type:"image/png"});const text=`${titleOf(T)} 本週末天氣：${VDL[T.lv]}（${T.why.join("、")}）`;
   try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text:text+"\n"+shareURL(T)});return}}catch(e){if(e&&e.name==="AbortError")return}
@@ -724,6 +732,12 @@ async function wxInit(force){
   const key="hcmap_wx_v2";let c=force?null:cacheGet(key);
   if(!c||c.v.length!==HOTS.length){try{c={at:Date.now(),v:await wxFetch(HOTS)};cacheSet(key,c)}catch(e){c=null;window._wxErr=(e&&(e.name==="AbortError"?"連線逾時":e.message))||""}}
   const P=new URLSearchParams(location.search);
+  if(!c&&CWA){WXAT=Date.now();HOTS.forEach(h=>{h.wx=null;prep(h)});upd.innerHTML=`資料：中央氣象署鄉鎮預報（Open-Meteo 暫時連不上：${esc(window._wxErr||"")}） <button class="rbtn" id="wxRe" style="margin-left:8px;font-size:12px">🔮 重新占卜</button>`;
+    document.getElementById("wxRe").onclick=()=>wxInit(true);
+    const ci0=P.get("camp"),hi0=P.get("hot");
+    if(ci0!=null&&CAMPW[+ci0]){openCamp(+ci0,false);document.getElementById("campQ").value=CAMPW[+ci0][0]}
+    else{const hh=hi0&&HOTS.find(h=>h.t===hi0);selectT(wxSel&&wxSel.kind==="hot"?wxSel:hh||[...HOTS].sort((a,b)=>a.lv-b.lv||b.score-a.score)[0],false)}
+    return}
   if(!c){upd.textContent="占卜失敗（"+(window._wxErr||"")+"）";drawHots();drawList();
     document.getElementById("intel").innerHTML=`<div class="rwin wxerr">🔮 水晶球暫時看不到天氣……${/github\.io$/.test(location.hostname)?"請稍後重新整理再試一次。":`天氣預報需要連線到天氣資料服務，請到正式網站查看：<a href="${SITE}" target="_blank" rel="noopener">sleepoutside.github.io/hero-camping-map</a>`}</div>`;return}
   WXAT=c.at;HOTS.forEach((h,i)=>{h.wx=c.v[i];prep(h)});
