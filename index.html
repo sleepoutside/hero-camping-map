@@ -328,7 +328,6 @@ footer,footer .sig{color:#c9cdf2}
       <li><b>天氣資料</b>：預報來自 Open-Meteo（整合各國氣象模式），每次開啟頁面時抓取最新資料，並依各熱點營地的平均海拔修正氣溫。模式預報與中央氣象署的官方預報可能不同，出發前請再查看氣象署與當地營地公告。</li>
       <li><b>熱點與營地數</b>：熱點是交通部觀光署「全台露營場資料」中營業中營地最多的鄉鎮（依「政府資料開放授權條款－第1版」利用），另補上屏東、宜蘭、花蓮、台東的代表鄉鎮；位置取該鄉鎮營地座標的中位數，海拔取營地海拔的中位數。</li>
       <li><b>推薦指數與裝備建議</b>：依預報數字自動產生的概略參考，不是專業判斷；颱風、豪雨或道路封閉等狀況請以官方資訊為準。</li>
-      <li><b>古地名</b>：地區與鄉鎮改用清代至日治時期的舊稱；沒有通行舊稱的原住民族地區鄉鎮，改用原住民族語的傳統名稱；兩者都沒有的鄉鎮沿用現名。</li>
       <li><b>瀏覽次數與流量統計</b>：頁尾的造訪次數由免費計數服務 Abacus 記錄；另以 GoatCounter 統計瀏覽頁面、來源網站、裝置與國家等匿名資料，不使用 Cookie，也不追蹤個人身分。</li>
     </ul>
   </div>
@@ -521,7 +520,7 @@ function dayOf(h,dstr){const D=h.wx;const i=D.time.indexOf(dstr);if(i<0)return n
   if(hrs.length){win=hrs.length>=14?"全日":`${pad(hrs[0])}–${pad(Math.min(24,hrs[hrs.length-1]+1))} 時`}
   return{k,lab,tmin:Math.round(D.tmin[i]),tmax:Math.round(D.tmax[i]),mm:Math.round(mm*10)/10,pop:D.pop[i]??0,gust:Math.round(D.gust[i]*10)/10,win,start:hrs[0]}}
 function wscore(days){let s=100;days.forEach((d,i)=>{if(!d)return;const k=i===0?.6:1;s-=k*(d.mm*2.2+d.pop*.22+(d.gust>10?(d.gust-10)*4:0)+(d.tmin<5?(5-d.tmin)*3:0))});return Math.max(1,Math.round(s))}
-function hotName(h){return `${OLD[h.c]||h.c}・${h.ot||h.t.slice(0,-1)}`}
+function hotName(h){return `${h.c}${h.t}`}
 async function wxLoad(force){
   const key="hcmap_wx_v1";
   if(!force){try{const c=JSON.parse(localStorage.getItem(key)||"null");if(c&&Date.now()-c.at<3600e3&&c.v.length===HOTS.length){return c}}catch(e){}}
@@ -545,13 +544,13 @@ function drawHots(){
   gH.selectAll("g.hot").data(order,d=>d.t).join(en=>{const g=en.append("g").attr("class","hot").attr("tabindex",0).attr("role","button");return g})
    .attr("aria-label",d=>`${hotName(d)}，週六${WCH[sat(d)]}`).classed("sel",d=>d===wxSel)
    .attr("transform",d=>{const[x,y]=proj([d.lon,d.lat]);return`translate(${Math.round(x)},${Math.round(y)})`})
-   .each(function(d){const big=d===wxSel;this.innerHTML=tentSVG(sat(d),big?40:24,big)+`<text class="hotlbl" text-anchor="${LBL[d.t]?LBL[d.t][0]:"middle"}" x="${LBL[d.t]?LBL[d.t][1]:0}" y="${big?16:12}">${d.t.length>2?d.t.slice(0,-1):d.t}</text><title>${hotName(d)}（${d.c}${d.t}）</title>`})
+   .each(function(d){const big=d===wxSel;this.innerHTML=tentSVG(sat(d),big?40:24,big)+`<text class="hotlbl" text-anchor="${LBL[d.t]?LBL[d.t][0]:"middle"}" x="${LBL[d.t]?LBL[d.t][1]:0}" y="${big?16:12}">${d.t.length>2?d.t.slice(0,-1):d.t}</text><title>${hotName(d)}</title>`})
    .on("click",(e,d)=>selectHot(d,true)).on("keydown",(e,d)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();selectHot(d,true)}});
 }
 function drawList(){
   const arr=[...HOTS];if(wxSort==="score")arr.sort((a,b)=>(b.score??-1)-(a.score??-1));else arr.sort((a,b)=>b.lat-a.lat);
   document.getElementById("wxSort").textContent=wxSort==="score"?"依推薦度":"由北到南";
-  document.getElementById("wxList").innerHTML=arr.map((h,i)=>`<button class="rrow${h===wxSel?" sel":""}" data-t="${h.t}"><span class="n">${wxSort==="score"?i+1:"·"}</span><span class="nm">${hotName(h)}<small>${h.c}${h.t} · ${h.n} 營地 · ${fmt(h.alt)}m</small></span>${(h.days||[null,null,null]).map(d=>`<span class="w">${d?`<span class="chip c-${d.k}">${WCH[d.k]}</span>`:"—"}</span>`).join("")}<span class="sc">${h.score??"--"}</span></button>`).join("");
+  document.getElementById("wxList").innerHTML=arr.map((h,i)=>`<button class="rrow${h===wxSel?" sel":""}" data-t="${h.t}"><span class="n">${wxSort==="score"?i+1:"·"}</span><span class="nm">${h.t}<small>${h.c} · ${h.n} 營地 · ${fmt(h.alt)}m</small></span>${(h.days||[null,null,null]).map(d=>`<span class="w">${d?`<span class="chip c-${d.k}">${WCH[d.k]}</span>`:"—"}</span>`).join("")}<span class="sc">${h.score??"--"}</span></button>`).join("");
   document.querySelectorAll("#wxList .rrow").forEach(b=>b.onclick=()=>selectHot(HOTS.find(h=>h.t===b.dataset.t),true));
 }
 function equip(h){
@@ -575,7 +574,7 @@ function dayTip(d,i,h){if(!d)return"";if(d.mm>=1){if(i===0&&d.start!=null&&d.sta
 function drawIntel(){
   const el=document.getElementById("intel");const h=wxSel;if(!h)return;
   const lab=["FRI","SAT","SUN"];
-  el.innerHTML=`<h3><span class="px">INTEL</span>冒險情報 · ${hotName(h)}<small>${h.c}${h.t} · 營地 ${h.n} 處 · 營地平均海拔 ${fmt(h.alt)}m · 推薦度 ${h.score}</small></h3>
+  el.innerHTML=`<h3><span class="px">INTEL</span>冒險情報 · ${hotName(h)}<small>營地 ${h.n} 處 · 營地平均海拔 ${fmt(h.alt)}m · 推薦度 ${h.score}</small></h3>
   <div class="icards">${h.days.map((d,i)=>d?`<div class="rwin dcard"><div class="t"><span class="px" style="color:${WCOL[d.k][0]}">${lab[i]}</span><span>降雨機率 ${d.pop}%</span></div>
    <div class="big"><canvas data-s="${WICO[d.k]}"></canvas><div><b>週${WDN[WEEKEND[i].getDay()]} ${md(WEEKEND[i])}</b><span style="color:${WCOL[d.k][0]}">${d.lab}</span></div></div>
    <dl><dt>氣溫</dt><dd>${d.tmin}–${d.tmax}°C</dd><dt>雨量</dt><dd style="color:${d.mm>0?"#5FD0FF":"#fff"}">${d.mm} mm</dd><dt>降雨時段</dt><dd style="color:#5FD0FF">${d.win||"—"}</dd><dt>陣風</dt><dd>${d.gust} m/s（${bft(d.gust)} 級）</dd></dl>
@@ -674,14 +673,14 @@ wxInit(false);
 /* ---------------- 魔域 ---------------- */
 const svg2=d3.select("#map2");defs(svg2,"b");svg2.append("path").datum(topojson.mesh(TOPO,TOPO.objects.counties,(a,b)=>a===b)).attr("d",path).attr("class","coast").attr("stroke-dasharray","4 3");
 svg2.append("g").selectAll("path").data(geo.features).join("path").attr("d",path).attr("class","county").style("cursor","default").attr("fill","#a87317");
-svg2.append("g").selectAll("text").data(cents.filter(c=>!["澎湖縣"].includes(c.n))).join("text").attr("class","lbl").attr("text-anchor","middle").attr("x",d=>d.x).attr("y",d=>d.y+4).style("fill","#fff").style("font-size","9.5px").text(d=>OLD[d.n]);
+svg2.append("g").selectAll("text").data(cents.filter(c=>!["澎湖縣"].includes(c.n))).join("text").attr("class","lbl").attr("text-anchor","middle").attr("x",d=>d.x).attr("y",d=>d.y+4).style("fill","#fff").style("font-size","9.5px").text(d=>/^(新竹|嘉義)/.test(d.n)?d.n:d.n.slice(0,2));
 const fra=EXTRA.fra.map(f=>{const m=f.alt.replace(/,/g,"").match(/(\d+)\D*$/);return {...f,lv:Math.round(+m[1]/100)}});
 const treeURI="data:image/svg+xml;utf8,"+encodeURIComponent(spriteURI("tree"));
 const mk=svg2.append("g").selectAll("g").data(fra).join("g").attr("class","marker").attr("transform",d=>{const[x,y]=proj([d.lon,d.lat]);return`translate(${x},${y})`});
 mk.append("image").attr("href",treeURI).attr("x",-10).attr("y",-20).attr("width",20).attr("height",20).style("image-rendering","pixelated");
 mk.append("text").attr("class","lbl").attr("x",12).attr("y",-6).style("font-size","10px").text(d=>d.n);
 mk.on("click",(e,d)=>hl(d.n,true)).on("mouseenter",(e,d)=>hl(d.n,false));
-document.getElementById("fcards").innerHTML=fra.sort((a,b)=>b.lv-a.lv).map(f=>`<div class="card" data-n="${f.n}"><h3><span>🌲 ${f.n}</span><span class="lv">Lv.${f.lv}</span></h3><div class="meta">${OLD[f.c]}（${f.c}）· ${f.t} · 海拔 ${f.alt}</div><div>${f.f}</div><a class="go" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(f.q)}" target="_blank" rel="noopener">▶ 前往（Google 地圖）</a></div>`).join("");
+document.getElementById("fcards").innerHTML=fra.sort((a,b)=>b.lv-a.lv).map(f=>`<div class="card" data-n="${f.n}"><h3><span>🌲 ${f.n}</span><span class="lv">Lv.${f.lv}</span></h3><div class="meta">${f.c}${f.t} · 海拔 ${f.alt}</div><div>${f.f}</div><a class="go" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(f.q)}" target="_blank" rel="noopener">▶ 前往（Google 地圖）</a></div>`).join("");
 function hl(n,scroll){document.querySelectorAll("#fcards .card").forEach(c=>{const on=c.dataset.n===n;c.classList.toggle("hl",on);if(on&&scroll)c.scrollIntoView({behavior:"smooth",block:"nearest"})});mk.selectAll("text").style("fill",d=>d.n===n?"#a8362a":null)}
 document.querySelectorAll("#fcards .card").forEach(c=>c.onmouseenter=()=>hl(c.dataset.n,false));
 
