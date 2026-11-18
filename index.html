@@ -639,7 +639,7 @@ function drawIntel(){
     const b=document.getElementById("wxRetry");if(b)b.onclick=()=>{T.wx=null;T.failed=false;openCamp(T.idx,false)};return}
   const lab=["FRI","SAT","SUN"];const al=alerts(T);
   el.innerHTML=`<h3><span class="px">INTEL</span>冒險情報 · ${esc(titleOf(T))}<small>${esc(subOf(T))}</small><span class="ibar"><button id="shareImg">📤 分享圖卡</button><button id="shareLink">🔗 複製連結</button></span></h3>
-  ${T.wx?"":`<div class="alert" style="background:#1e2a6b;border-color:#F2B233">目前只拿到氣象署的鄉鎮預報（Open-Meteo 暫時連不上），雨量、陣風、結露等數字先空著。${T.kind==="camp"?'<button class="rbtn" id="wxRetry2" style="margin-left:8px">再試一次</button>':""}</div>`}
+  ${T.wx?"":`<div class="alert" style="background:#1e2a6b;border-color:#F2B233">${T.loading?"🔮 正在用營地精確位置與海拔占卜中，先顯示氣象署的鄉鎮預報……":`目前只拿到氣象署的鄉鎮預報（Open-Meteo 暫時連不上），雨量、陣風、結露等數字先空著。${T.kind==="camp"?'<button class="rbtn" id="wxRetry2" style="margin-left:8px">再試一次</button>':""}`}</div>`}
   <div class="verdict"><span class="vd vd${T.lv}">${VDL[T.lv]}</span><span>${T.why.map(esc).join("、")}</span></div>
   ${al.length?`<div class="alert">⚠ ${al.join("；")}。這是依預報數字的提醒，請以氣象署發布的警特報為準。</div>`:""}
   <div class="offi">${CWA&&CWA.issued&&T.days.some(d=>d&&d.cwa)?`<span>氣象署鄉鎮預報 ${CWA.issued.slice(5,10).replace("-","/")} ${CWA.issued.slice(11,16)} 更新（${esc(T.c+T.t)}，以鄉鎮公所位置為準）·</span>`:""}<span>出發前再確認：</span><a href="https://www.cwa.gov.tw/" target="_blank" rel="noopener">中央氣象署（警特報）</a><a href="https://www.cwa.gov.tw/V8/C/P/Typhoon/TY_WARN.html" target="_blank" rel="noopener">颱風警報</a><a href="https://168.thb.gov.tw/" target="_blank" rel="noopener">公路局省道即時路況</a></div>
@@ -667,7 +667,7 @@ function selectT(T,user){wxSel=T;drawHots();drawList();drawIntel();
 const CAMPOBJ=new Map();
 function campObj(i){if(CAMPOBJ.has(i))return CAMPOBJ.get(i);const r=CAMPW[i];if(!r)return null;const o={kind:"camp",idx:i,key:"c"+i,name:r[0],c:r[1],t:r[2],lat:r[3],lon:r[4],alt:r[5],osm:!!r[6]};CAMPOBJ.set(i,o);return o}
 async function openCamp(i,user){const T=campObj(i);if(!T)return;
-  if(!T.wx){T.loading=true;selectT(T,user);const k=`hcmap_wxc_${T.lat},${T.lon}`;let c=cacheGet(k);
+  if(!T.wx){T.loading=true;try{prep(T)}catch(_){}selectT(T,user);const k=`hcmap_wxc_${T.lat},${T.lon}`;let c=cacheGet(k);
     try{if(!c){const [w]=await wxFetch([T]);c={at:Date.now(),w};cacheSet(k,c)}T.wx=c.w;prep(T);T.err=""}catch(e){T.wx=null;try{prep(T)}catch(_){}T.err=(e&&(e.name==="AbortError"?"連線逾時":e.message))||"未知錯誤";try{console.warn("camp weather failed",e)}catch(_){}}T.loading=false}
   if(wxSel===T||!wxSel)selectT(T,user)}
 
