@@ -557,7 +557,7 @@ function dayOfCWA(T,dstr){const c=cwaDay(T,dstr);if(!c||c.tmin==null)return null
   const lead=Math.round((new Date(dstr+"T12:00:00")-TODAY)/864e5);
   return{k:cwaKind(row[2],c.wx),lab:c.wx,tmin:c.tmin,tmax:c.tmax,mm:null,pop:c.pop,gust:null,win:"",start:null,cwa:c,sunset:"",rhN:null,dew:null,fog:0,conf:lead<=1?0:lead<=3?1:2,only:true}}
 function dayOf(T,dstr){const D=T.wx;if(!D)return dayOfCWA(T,dstr);const i=D.time.indexOf(dstr);if(i<0)return null;
-  const mm=D.mm[i]??0,[k,lab]=wkind(D.code[i],mm),E=D.ext[dstr]||{rain:[]};const hrs=E.rain;let win="";
+  const mm=D.mm[i]??0,E=D.ext[dstr]||{rain:[]};let [k,lab]=wkind(D.code[i],mm);if((D.code[i]===45||D.code[i]===48)&&(E.fog||0)<3){k="pc";lab="多雲"}const hrs=E.rain;let win="";
   if(hrs.length)win=hrs.length>=14?"全日":`${pad(hrs[0])}–${pad(Math.min(24,hrs[hrs.length-1]+1))} 時`;
   const lead=Math.round((new Date(dstr+"T12:00:00")-TODAY)/864e5);
   const sp=E.spread;const dew=sp==null?null:sp<=1?2:sp<=2.5?1:0;
