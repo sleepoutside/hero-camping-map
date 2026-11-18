@@ -522,7 +522,7 @@ const SITE="https://sleepoutside.github.io/hero-camping-map/";
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let wxSel=null,wxSort="verdict",WXAT=null,CWA=null;
 function cwaDay(T,dstr){if(!CWA||!CWA.towns)return null;const rows=CWA.towns[(T.c+T.t).replace(/臺/g,"台")];if(!rows)return null;
-  const day=rows.find(r=>r[0]===dstr+"T06:00"),night=rows.find(r=>r[0]===dstr+"T18:00"),all=[day,night].filter(Boolean);if(!all.length)return null;
+  const day=rows.find(r=>r[0].startsWith(dstr)&&+r[0].slice(11,13)<18),night=rows.find(r=>r[0].startsWith(dstr)&&+r[0].slice(11,13)>=18),all=[day,night].filter(Boolean);if(!all.length)return null;
   const nums=(k)=>all.map(r=>r[k]).filter(v=>v!=null);const pops=nums(5);
   return{wx:(day||night)[1],tmax:nums(3).length?Math.max(...nums(3)):null,tmin:nums(4).length?Math.min(...nums(4)):null,pop:pops.length?Math.max(...pops):null}}
 
