@@ -536,7 +536,7 @@ async function wxFetch(pts){
   let j=await r.json();if(!Array.isArray(j))j=[j];return j.map(parseWx)}
 function parseWx(x){
   const H=x.hourly,D=x.daily,byDate={};
-  H.time.forEach((t,i)=>{const d=t.slice(0,10);(byDate[d]=byDate[d]||[]).push({h:+t.slice(11,13),p:H.precipitation[i]||0,t:H.temperature_2m[i],rh:H.relative_humidity_2m[i],td:H.dew_point_2m[i],vis:H.visibility[i]})});
+  const A=k=>H[k]||[];H.time.forEach((t,i)=>{const d=t.slice(0,10);(byDate[d]=byDate[d]||[]).push({h:+t.slice(11,13),p:A("precipitation")[i]||0,t:A("temperature_2m")[i],rh:A("relative_humidity_2m")[i],td:A("dew_point_2m")[i],vis:A("visibility")[i]})});
   const ext={};
   D.time.forEach((d,i)=>{const hrs=byDate[d]||[];const nxt=D.time[i+1]?byDate[D.time[i+1]]||[]:[];
     const rain=hrs.filter(o=>o.p>=0.3).map(o=>o.h);
@@ -628,7 +628,9 @@ function titleOf(T){return T.kind==="camp"?T.name:hotName(T)}
 function subOf(T){return T.kind==="camp"?`${T.c}${T.t} · 海拔 ${T.alt!=null?fmt(T.alt)+"m":"不明"}${T.osm?" · OSM":""}`:`營地 ${T.n} 處 · 營地平均海拔 ${fmt(T.alt)}m · 熱點`}
 function drawIntel(){
   const el=document.getElementById("intel");const T=wxSel;if(!T)return;
-  if(!T.wx){el.innerHTML=`<div class="rwin wxerr">${T.loading?"🔮 占卜中…":"🔮 水晶球看不到這裡的天氣，請稍後再試。"}</div>`;return}
+  if(!T.wx){const onSite=/github\.io$/.test(location.hostname);
+    el.innerHTML=`<div class="rwin wxerr">${T.loading?"🔮 占卜中…":onSite?`🔮 水晶球看不到「${esc(titleOf(T))}」的天氣，可能是天氣服務暫時忙碌。 <button class="rbtn" id="wxRetry">再占卜一次</button>`:`🔮 這裡無法連線到天氣資料服務，請到正式網站查詢：<a href="${shareURL(T)}" target="_blank" rel="noopener">在正式網站打開「${esc(titleOf(T))}」</a>`}</div>`;
+    const b=document.getElementById("wxRetry");if(b)b.onclick=()=>{T.wx=null;T.failed=false;openCamp(T.idx,false)};return}
   const lab=["FRI","SAT","SUN"];const al=alerts(T);
   el.innerHTML=`<h3><span class="px">INTEL</span>冒險情報 · ${esc(titleOf(T))}<small>${esc(subOf(T))}</small><span class="ibar"><button id="shareImg">📤 分享圖卡</button><button id="shareLink">🔗 複製連結</button></span></h3>
   <div class="verdict"><span class="vd vd${T.lv}">${VDL[T.lv]}</span><span>${T.why.map(esc).join("、")}</span></div>
@@ -658,7 +660,7 @@ const CAMPOBJ=new Map();
 function campObj(i){if(CAMPOBJ.has(i))return CAMPOBJ.get(i);const r=CAMPW[i];if(!r)return null;const o={kind:"camp",idx:i,key:"c"+i,name:r[0],c:r[1],t:r[2],lat:r[3],lon:r[4],alt:r[5],osm:!!r[6]};CAMPOBJ.set(i,o);return o}
 async function openCamp(i,user){const T=campObj(i);if(!T)return;
   if(!T.wx){T.loading=true;selectT(T,user);const k=`hcmap_wxc_${T.lat},${T.lon}`;let c=cacheGet(k);
-    try{if(!c){const [w]=await wxFetch([T]);c={at:Date.now(),w};cacheSet(k,c)}T.wx=c.w;prep(T)}catch(e){T.wx=null}T.loading=false}
+    try{if(!c){const [w]=await wxFetch([T]);c={at:Date.now(),w};cacheSet(k,c)}T.wx=c.w;prep(T)}catch(e){T.wx=null;try{console.warn("camp weather failed",e)}catch(_){}}T.loading=false}
   if(wxSel===T||!wxSel)selectT(T,user)}
 
 /* ---- 搜尋 ---- */
