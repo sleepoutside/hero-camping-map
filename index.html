@@ -730,7 +730,9 @@ async function wxInit(force){
   const upd=document.getElementById("wxUpd");upd.textContent="占卜中…";
   if(!CWA){try{const r=await fetch("cwa.json",{cache:"no-cache"});if(r.ok)CWA=await r.json()}catch(e){}}
   const key="hcmap_wx_v2";let c=force?null:cacheGet(key);
-  if(!c||c.v.length!==HOTS.length){try{c={at:Date.now(),v:await wxFetch(HOTS)};cacheSet(key,c)}catch(e){c=null;window._wxErr=(e&&(e.name==="AbortError"?"連線逾時":e.message))||""}}
+  let OMH=null;try{const r=await fetch("om_hot.json",{cache:"no-cache"});if(r.ok){const j=await r.json();if(j&&Array.isArray(j.v)&&j.v.length===HOTS.length&&Date.now()-j.at<12*3600e3)OMH={at:j.at,v:j.v.map(parseWx)}}}catch(e){}
+  if(!force&&(!c||c.v.length!==HOTS.length)&&OMH)c=OMH;
+  if(!c||c.v.length!==HOTS.length){try{c={at:Date.now(),v:await wxFetch(HOTS)};cacheSet(key,c)}catch(e){c=OMH;window._wxErr=(e&&(e.name==="AbortError"?"連線逾時":e.message))||""}}
   const P=new URLSearchParams(location.search);
   if(!c&&CWA){WXAT=Date.now();HOTS.forEach(h=>{h.wx=null;prep(h)});upd.innerHTML=`資料：中央氣象署鄉鎮預報（Open-Meteo 暫時連不上：${esc(window._wxErr||"")}） <button class="rbtn" id="wxRe" style="margin-left:8px;font-size:12px">🔮 重新占卜</button>`;
     document.getElementById("wxRe").onclick=()=>wxInit(true);
