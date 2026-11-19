@@ -254,7 +254,7 @@ td.stc{width:84px}.stm{display:none}
 .alert{margin:0 0 14px;padding:10px 14px;background:#4a1010;border:3px solid #E0452B;border-radius:4px;font-size:15px;font-weight:700;line-height:1.6}
 .offi{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:13px;margin:0 0 14px;color:var(--mut2)}.offi a{color:var(--gold)}
 .conf{font-size:11px;padding:0 5px;border:1px solid currentColor;border-radius:2px;margin-left:6px}.cf0{color:#9be37a}.cf1{color:#F2B233}.cf2{color:#ff8f7a}
-.ibar{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}.ibar button{font:inherit;font-size:13px;font-weight:700;color:#fff;background:#1e2a6b;border:2px solid #fff;border-radius:3px;padding:4px 10px;cursor:pointer}.ibar button:hover{border-color:var(--gold);color:var(--gold)}.ibar a{font:inherit;font-size:13px;font-weight:700;color:#fff;background:#1e2a6b;border:2px solid #fff;border-radius:3px;padding:4px 10px;text-decoration:none}.ibar a:hover{border-color:var(--gold);color:var(--gold)}.dcard dd.mdl{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}.dcard dd.mdl span{font-size:12px;padding:0 3px;border:1px solid #3a4580;border-radius:2px;color:#9AA6D6}.dcard dd.mdl span.wet{color:#5FD0FF;border-color:#5FD0FF}
+.ibar{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}.ibar button{font:inherit;font-size:13px;font-weight:700;color:#fff;background:#1e2a6b;border:2px solid #fff;border-radius:3px;padding:4px 10px;cursor:pointer}.ibar button:hover{border-color:var(--gold);color:var(--gold)}.ibar a{font:inherit;font-size:13px;font-weight:700;color:#fff;background:#1e2a6b;border:2px solid #fff;border-radius:3px;padding:4px 10px;text-decoration:none}.ibar a:hover{border-color:var(--gold);color:var(--gold)}.smenu{position:fixed;inset:0;background:rgba(5,8,30,.72);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px}.smbox{max-width:420px;width:100%;padding:14px 16px;box-sizing:border-box;max-height:92vh;overflow:auto}.smbox .t{display:flex;align-items:center;gap:10px}.smx{margin-left:auto;background:none;border:0;color:#fff;font-size:18px;cursor:pointer}.smbox img{width:100%;display:block;margin:10px 0;border:2px solid #3a4580}.smbtns{display:grid;gap:8px}.smbtns button{font:inherit;font-weight:700;color:#fff;background:#1e2a6b;border:2px solid #fff;border-radius:3px;padding:8px 12px;text-align:left;cursor:pointer}.smbtns button:hover{border-color:var(--gold);color:var(--gold)}.smbtns small{display:block;font-weight:400;font-size:12px;color:#9AA6D6;margin-top:2px}.dcard dd.mdl{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}.dcard dd.mdl span{font-size:12px;padding:0 3px;border:1px solid #3a4580;border-radius:2px;color:#9AA6D6}.dcard dd.mdl span.wet{color:#5FD0FF;border-color:#5FD0FF}
 .camp-flag{pointer-events:none}
 .dcard .cwa{font-size:13px;background:#13235e;border-left:4px solid #6cc04a;padding:4px 8px;margin:-2px 0 10px;line-height:1.5}.dcard .cwa b{color:#9be37a;margin-right:6px;font-weight:900}
 .wxerr{padding:16px 18px;font-size:15px;line-height:1.7}.wxerr a{color:var(--gold)}
@@ -725,7 +725,7 @@ function cardCanvas(T){
   g.font=`900 56px ${F}`;let tt=titleOf(T);while(g.measureText(tt).width>930&&tt.length>4)tt=tt.slice(0,-2)+"…";txt(tt,72,162,56);
   txt(subOf(T),72,206,24,"#DCE3FF",F,700);
   const vc=["#6cc04a","#F2B233","#E0452B"][T.lv];g.fillStyle=vc;g.fillRect(72,226,120,42);txt(VDL[T.lv],132,257,26,T.lv===2?"#fff":"#10173A",F,900,"center");
-  wrap(T.why.join("、"),208,256,800,32,22,"#ffffff",700);
+  {g.font=`700 22px ${F}`;let w=T.why.join("、");if(g.measureText(w).width>800)w=T.why.map(x=>x.replace(/（[^）]*）/g,"")).join("、");while(g.measureText(w).width>800&&w.length>4)w=w.slice(0,-2)+"…";txt(w,208,256,22,"#ffffff",F,700)}
   const lab=["FRI","SAT","SUN"];
   T.days.forEach((d,i)=>{const x=40+i*340,y=330;win(x,y,320,500);txt(lab[i],x+24,y+44,18,d?WCOL[d.k][0]:"#9AA6D6",P,400);
     txt(`${md(WEEKEND[i])}（${WDN[WEEKEND[i].getDay()]}）`,x+24,y+88,28);
@@ -739,12 +739,29 @@ function cardCanvas(T){
   txt("勇者露營天氣查詢 · sleepoutside.github.io/hero-camping-map",40,1318,18,"#DCE3FF",F,700);
   txt(`資料 Open-Meteo · ${md(new Date(WXAT||Date.now()))} 更新 · 僅供參考`,1040,1318,15,"#9AA6D6",F,500,"right");
   return c}
+const isMobile=()=>/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Macintosh/.test(navigator.userAgent));
 async function shareCard(){
   const T=wxSel;if(!T||!(T.days&&T.days.some(Boolean)))return;try{await document.fonts.ready}catch(e){}
   const c=cardCanvas(T);const blob=await new Promise(r=>c.toBlob(r,"image/png"));const fn=`勇者露營天氣_${titleOf(T)}.png`;
   const file=new File([blob],fn,{type:"image/png"});const text=`${titleOf(T)} 本週末天氣：${VDL[T.lv]}（${T.why.join("、")}）`;
-  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text:text+"\n"+shareURL(T)});return}}catch(e){if(e&&e.name==="AbortError")return}
-  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);flash("圖卡已下載，可直接傳到 LINE")}
+  if(isMobile()){try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text:text+"\n"+shareURL(T)});return}}catch(e){if(e&&e.name==="AbortError")return}}
+  shareMenu(T,blob,fn,text)}
+function dlBlob(blob,fn){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+function shareMenu(T,blob,fn,text){let m=document.getElementById("shareMenu");if(m)m.remove();
+  m=document.createElement("div");m.id="shareMenu";m.className="smenu";const url=URL.createObjectURL(blob);
+  const canCopy=!!(navigator.clipboard&&window.ClipboardItem);
+  m.innerHTML=`<div class="rwin smbox" role="dialog" aria-label="分享圖卡"><div class="t"><span class="px">SHARE</span><span>分享圖卡</span><button class="smx" aria-label="關閉">✕</button></div>
+   <img src="${url}" alt="分享圖卡預覽">
+   <div class="smbtns">${canCopy?'<button data-a="copy">📋 複製圖片<small>到 LINE 聊天室按 Ctrl+V 貼上</small></button>':""}
+   <button data-a="dl">⬇ 下載圖片<small>再拖進 LINE 聊天室</small></button>
+   <button data-a="line">🟩 用 LINE 分享連結<small>開啟 LINE 分享頁，傳連結給朋友</small></button></div></div>`;
+  document.body.appendChild(m);const close=()=>{m.remove();URL.revokeObjectURL(url)};
+  m.onclick=e=>{if(e.target===m)close()};m.querySelector(".smx").onclick=close;
+  m.querySelectorAll("[data-a]").forEach(b=>b.onclick=async()=>{const a=b.dataset.a;
+    if(a==="copy"){try{await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);flash("圖片已複製，到 LINE 聊天室按 Ctrl+V 貼上")}catch(e){dlBlob(blob,fn);flash("無法複製，已改為下載圖片")}}
+    else if(a==="dl"){dlBlob(blob,fn);flash("圖卡已下載")}
+    else{window.open("https://social-plugins.line.me/lineit/share?url="+encodeURIComponent(shareURL(T))+"&text="+encodeURIComponent(text),"_blank","noopener")}
+    if(a!=="line")close()})}
 
 /* ---- 初始化 ---- */
 let sortFlips=0;document.getElementById("wxSort").onclick=()=>{wxSort=wxSort==="verdict"?"lat":"verdict";drawList();if(++sortFlips>=4)try{unlock("karen")}catch(e){}};
