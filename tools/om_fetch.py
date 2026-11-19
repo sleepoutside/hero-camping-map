@@ -8,8 +8,8 @@ Q = {
     "latitude": ",".join(str(h["lat"]) for h in HOTS),
     "longitude": ",".join(str(h["lon"]) for h in HOTS),
     "elevation": ",".join(str(h["alt"]) for h in HOTS),
-    "daily": "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_gusts_10m_max,sunset",
-    "hourly": "precipitation,temperature_2m,relative_humidity_2m,dew_point_2m,visibility",
+    "daily": "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_gusts_10m_max,sunset,sunrise",
+    "hourly": "precipitation,temperature_2m,relative_humidity_2m,dew_point_2m,visibility,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day",
     "wind_speed_unit": "ms", "timezone": "Asia/Taipei", "past_days": "2", "forecast_days": "8",
 }
 url = "https://api.open-meteo.com/v1/forecast?" + urllib.parse.urlencode(Q)
