@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>勇者露營天氣查詢（福爾摩莎島篇）</title>
+<title>你的露營天氣online</title>
 <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+TC:wght@400;500;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
@@ -307,7 +307,7 @@ footer,footer .sig{color:#c9cdf2}
 </style></head>
 <body>
 <div class="top"><div class="in">
-  <div class="brand" id="home" role="button" tabindex="0" title="回首頁" style="cursor:pointer;user-select:none"><canvas id="sp-tent" width="16" height="16" style="width:32px;height:32px"></canvas><h1>勇者露營天氣查詢<small>（福爾摩莎島篇）</small></h1></div>
+  <div class="brand" id="home" role="button" tabindex="0" title="回首頁" style="cursor:pointer;user-select:none"><canvas id="sp-tent" width="16" height="16" style="width:32px;height:32px"></canvas><h1>你的露營天氣online</h1></div>
   <div class="chap"><span class="on">福爾摩莎島篇</span><span class="off" title="敬請期待">日出國篇 · 敬請期待</span></div>
   <div class="tabs" id="tabs">
     <button data-v="fee" class="on">天氣情報</button>
@@ -755,7 +755,7 @@ function cardCanvas(T){
     const end=wrap(e[1],72+Math.min(w+16,420),yy,1000-Math.min(w+16,420)-60,30,21,"#ffffff",500);yy=end+40});
   const WY=EY+EH-140,cw=124;NEXT7.forEach((dt,k)=>{const d=dayOf(T,iso(dt));if(!d)return;const cx=72+k*(cw+10),we=[5,6,0].includes(dt.getDay());
     g.strokeStyle=we?"#FFE08A":"#9AA6D6";g.lineWidth=2;g.strokeRect(cx,WY,cw,116);txt(`週${WDN[dt.getDay()]}`,cx+cw/2,WY+28,19,"#fff",F,700,"center");sprite(WICO[d.k],cx+cw/2-20,WY+38,40);txt(`${d.tmin}–${d.tmax}°`,cx+cw/2,WY+104,20,"#fff",F,900,"center")});
-  txt("勇者露營天氣查詢 · sleepoutside.github.io/hero-camping-map",40,H-28,18,"#DCE3FF",F,700);
+  txt("你的露營天氣online · sleepoutside.github.io/hero-camping-map",40,H-28,18,"#DCE3FF",F,700);
   txt(`資料 Open-Meteo${CWA&&CWA.issued&&T.days.some(d=>d&&d.cwa)?"・氣象署 "+CWA.issued.slice(5,10).replace("-","/")+" "+CWA.issued.slice(11,16):""} · ${md(new Date(WXAT||Date.now()))} 更新 · 僅供參考`,1040,H-28,15,"#9AA6D6",F,500,"right");
   return c}
 const isMobile=()=>/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Macintosh/.test(navigator.userAgent));
