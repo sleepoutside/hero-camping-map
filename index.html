@@ -343,10 +343,17 @@ footer,footer .sig{color:#c9cdf2}
     <ul>
       <li><b>天氣資料</b>：預報來自 Open-Meteo（整合各國氣象模式），每次開啟頁面時抓取最新資料，並依各熱點營地的平均海拔修正氣溫。模式預報與中央氣象署的官方預報可能不同，出發前請再查看氣象署與當地營地公告。</li>
       <li><b>熱點與營地數</b>：熱點是交通部觀光署「全台露營場資料」中營業中營地最多的鄉鎮（依「政府資料開放授權條款－第1版」利用），另補上屏東、宜蘭、花蓮、台東的代表鄉鎮；位置取該鄉鎮營地座標的中位數，海拔取營地海拔的中位數。</li>
-      <li><b>適合／普通／不建議</b>與裝備建議：依預報數字自動產生的概略參考，不是專業判斷。頁面上的雨量與強風提醒是依數值模式預報數字換算，<b>不是氣象署發布的預報或警特報</b>；颱風、豪雨等特報與道路封閉請以氣象署、公路局公告為準。</li>
-      <li><b>氣象署預報</b>：天氣卡中綠色標示「氣象署」的一行，取自中央氣象署「鄉鎮天氣預報－未來1週」，每天自動更新 4 次。氣象署的鄉鎮預報以鄉鎮公所位置為代表點，山區營地海拔若比公所高很多，實際氣溫會更低，請一併參考下方依營地海拔修正的數字。</li>
-      <li><b>可信度</b>：預報日距今天越遠越不準。1 天內標「高」、2–3 天「中」、4 天以上「低」，低可信度的日子請在出發前一兩天再確認。</li>
-      <li><b>結露與起霧</b>：結露依夜間氣溫與露點的差距估算（差距越小越容易結露），起霧依預報能見度低於 1 公里的時數估算，都是概略參考。</li>
+      <li><b>判斷依據</b>：頁面上的「適合／普通／不建議」、提醒與裝備建議，都是把天氣卡上列出的數字套用下面的固定規則換算出來的，不另做研判，<b>不是氣象署發布的預報或警特報</b>；颱風、豪雨等特報與道路封閉請以氣象署、公路局公告為準。
+        <ul>
+          <li><b>不建議</b>：週末任一天預估雨量 30 mm 以上、陣風 17 m/s 以上，或夜間最低溫 0°C 以下。</li>
+          <li><b>普通</b>：任一天預估雨量 3 mm 以上、降雨機率 70% 以上（Open-Meteo 或氣象署）、五個模型中有兩個以上預報當日雨量 1 mm 以上、陣風 12 m/s 以上，或夜間最低溫 5°C 以下。</li>
+          <li><b>適合</b>：以上都沒有。</li>
+          <li><b>雨量、強風、低溫提醒</b>：單日雨量 40 mm 以上標「偏多」、80 mm 以上標「很多」；陣風 17 m/s 以上；最低溫 2°C 以下。</li>
+          <li><b>裝備建議</b>：依同一組數字套用固定規則產生的一般性提醒，例如有雨就建議帶天幕與防水地布、陣風 8 m/s 以上就提醒營繩拉緊。</li>
+        </ul></li>
+      <li><b>氣象署預報</b>：天氣卡中綠色標示「氣象署」的一行，取自中央氣象署開放資料「鄉鎮天氣預報－未來1週」（出處：<a href="https://www.cwa.gov.tw/Data/data_catalog/1-1-1.pdf" target="_blank" rel="noopener">氣象署鄉鎮預報產品說明</a>），每天自動更新 4 次。氣象署的鄉鎮預報以鄉鎮公所位置為代表點，山區營地海拔若比公所高很多，實際氣溫會更低，請一併參考下方依營地海拔修正的數字。</li>
+      <li><b>模型一致度</b>：依兩個數字換算：預報日距今天的天數（1 天內「高」、2–3 天「中」、4 天以上「低」），以及五個全球模型（歐洲、美國、日本、德國、中國）當日雨量的差距（有的模型說有雨、有的說沒有，或差距 5 mm 以上，就往下調一級）。各模型的雨量數字都列在天氣卡上。</li>
+      <li><b>結露與起霧</b>：結露依夜間（18 時到隔天 6 時）預報氣溫與露點的最小差距換算：1°C 以內「高」、2.5°C 以內「中」，差距數字列在天氣卡上。起霧是預報能見度低於 1 公里的時數，3 小時以上才標示。</li>
       <li><b>查我要去的營地</b>：營地位置與海拔取自觀光署資料（另含 OpenStreetMap 補充的營地，© OpenStreetMap 貢獻者，ODbL），座標若有偏差，預報也會跟著不準。</li>
       <li><b>瀏覽次數與流量統計</b>：頁尾的造訪次數由免費計數服務 Abacus 記錄；另以 GoatCounter 統計瀏覽頁面、來源網站、裝置與國家等匿名資料，不使用 Cookie，也不追蹤個人身分。</li>
     </ul>
@@ -380,7 +387,7 @@ footer,footer .sig{color:#c9cdf2}
   </ul></div>
 </section>
 </div>
-<footer><span>資料來源：網路（天氣資料 <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color:inherit">Open-Meteo.com</a>，CC BY 4.0；鄉鎮預報 <a href="https://www.cwa.gov.tw/" target="_blank" rel="noopener" style="color:inherit">中央氣象署</a>開放資料）　｜　本站整理全球數值模式與中央氣象署公開資料，非氣象署發布之預報，請以氣象署預報及警特報為準</span><span class="sig"><span id="visits" style="display:none;margin-right:14px"></span>設計／Sleepoutside Camp　*非營利使用</span></footer>
+<footer><span>資料來源：網路（天氣資料 <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color:inherit">Open-Meteo.com</a>，CC BY 4.0；鄉鎮預報 <a href="https://www.cwa.gov.tw/Data/data_catalog/1-1-1.pdf" target="_blank" rel="noopener" style="color:inherit">中央氣象署開放資料</a>）　｜　本站整理全球數值模式與中央氣象署公開資料，非氣象署發布之預報。以上資訊僅提供參考與學術討論之用，氣象預報應以中央氣象署為準</span><span class="sig"><span id="visits" style="display:none;margin-right:14px"></span>設計／Sleepoutside Camp　*非營利使用</span></footer>
 <div class="tip" id="tip"></div>
 
 <script>
@@ -582,7 +589,7 @@ function dayOf(T,dstr){const D=T.wx;if(!D)return dayOfCWA(T,dstr);const i=D.time
   const lead=Math.round((new Date(dstr+"T12:00:00")-TODAY)/864e5);
   const sp=E.spread;const dew=sp==null?null:sp<=1?2:sp<=2.5?1:0;
   return withMdl({k,lab,tmin:Math.round(D.tmin[i]),tmax:Math.round(D.tmax[i]),mm:Math.round(mm*10)/10,pop:D.pop[i]??0,gust:Math.round(D.gust[i]*10)/10,win,start:hrs[0],
-    cwa:cwaDay(T,dstr),sunset:D.sunset&&D.sunset[i]?D.sunset[i].slice(11,16):"",rhN:E.rhN==null?null:Math.round(E.rhN),dew,fog:E.fog||0,conf:lead<=1?0:lead<=3?1:2},T,dstr)}
+    cwa:cwaDay(T,dstr),sunset:D.sunset&&D.sunset[i]?D.sunset[i].slice(11,16):"",rhN:E.rhN==null?null:Math.round(E.rhN),dew,sp:sp==null?null:Math.round(sp*10)/10,fog:E.fog||0,conf:lead<=1?0:lead<=3?1:2},T,dstr)}
 function judge(T){
   let lv=0,score=100;const why=[];
   T.days.forEach((d,i)=>{if(!d)return;const w=i===0?.6:1;score-=w*((d.mm||0)*2.2+(d.pop||0)*.22+(d.gust>10?(d.gust-10)*4:0)+(d.tmin<5?(5-d.tmin)*3:0));
@@ -662,16 +669,16 @@ function drawIntel(){
   el.innerHTML=`<h3><span class="px">INTEL</span>冒險情報 · ${esc(titleOf(T))}<small>${esc(subOf(T))}</small><span class="ibar"><a href="https://sleepoutside.github.io/tent-planner/weather.html?${T.kind==="camp"?"camp="+T.idx:"hot="+encodeURIComponent(T.t)}" target="_blank" rel="noopener">🏕 你的露營天氣online</a><a href="https://www.windy.com/${(+T.lat).toFixed(3)}/${(+T.lon).toFixed(3)}?${(+T.lat).toFixed(3)},${(+T.lon).toFixed(3)},11" target="_blank" rel="noopener">🌀 在 Windy 看這裡</a><button id="shareImg">📤 分享圖卡</button><button id="shareLink">🔗 複製連結</button></span></h3>
   ${T.wx?"":`<div class="alert" style="background:#1e2a6b;border-color:#F2B233">${T.loading?"🔮 正在用營地精確位置與海拔占卜中，先顯示氣象署的鄉鎮預報……":`目前只拿到氣象署的鄉鎮預報（Open-Meteo 暫時連不上），雨量、陣風、結露等數字先空著。${T.kind==="camp"?'<button class="rbtn" id="wxRetry2" style="margin-left:8px">再試一次</button>':""}`}</div>`}
   <div class="verdict"><span class="vd vd${T.lv}">${VDL[T.lv]}</span><span>${T.why.map(esc).join("、")}</span></div>
-  ${al.length?`<div class="alert">⚠ ${al.join("；")}。這是依數值模式預報的提醒，不是氣象署的警特報，請以<a href="https://www.cwa.gov.tw/" target="_blank" rel="noopener">中央氣象署</a>發布的預報與警特報為準。</div>`:""}
-  <div class="offi">${CWA&&CWA.issued&&T.days.some(d=>d&&d.cwa)?`<span>氣象署鄉鎮預報 ${CWA.issued.slice(5,10).replace("-","/")} ${CWA.issued.slice(11,16)} 更新（${esc(T.c+T.t)}，以鄉鎮公所位置為準）·</span>`:""}<span>出發前再確認：</span><a href="https://www.cwa.gov.tw/" target="_blank" rel="noopener">中央氣象署（警特報）</a><a href="https://www.cwa.gov.tw/V8/C/P/Typhoon/TY_WARN.html" target="_blank" rel="noopener">颱風警報</a><a href="https://168.thb.gov.tw/" target="_blank" rel="noopener">公路局省道即時路況</a></div>
-  <div class="icards">${T.days.map((d,i)=>d?`<div class="rwin dcard"><div class="t"><span class="px" style="color:${WCOL[d.k][0]}">${lab[i]}</span><span>${d.pop!=null?`降雨機率 ${d.pop}%`:""}<span class="conf cf${d.conf}" title="預報可信度">可信度 ${CONF[d.conf]}</span></span></div>
+  ${al.length?`<div class="alert">⚠ ${al.join("；")}。這是依數值模式預報數字換算的提醒，不是氣象署的警特報。以上資訊僅提供參考與學術討論之用，氣象預報應以<a href="https://www.cwa.gov.tw/" target="_blank" rel="noopener">中央氣象署</a>為準。</div>`:""}
+  <div class="offi">${CWA&&CWA.issued&&T.days.some(d=>d&&d.cwa)?`<span>氣象署鄉鎮預報 ${CWA.issued.slice(5,10).replace("-","/")} ${CWA.issued.slice(11,16)} 更新（${esc(T.c+T.t)}，以鄉鎮公所位置為準；出處：<a href="https://www.cwa.gov.tw/Data/data_catalog/1-1-1.pdf" target="_blank" rel="noopener">氣象署鄉鎮預報產品說明</a>）·</span>`:""}<span>出發前再確認：</span><a href="https://www.cwa.gov.tw/" target="_blank" rel="noopener">中央氣象署（警特報）</a><a href="https://www.cwa.gov.tw/V8/C/P/Typhoon/TY_WARN.html" target="_blank" rel="noopener">颱風警報</a><a href="https://168.thb.gov.tw/" target="_blank" rel="noopener">公路局省道即時路況</a></div>
+  <div class="icards">${T.days.map((d,i)=>d?`<div class="rwin dcard"><div class="t"><span class="px" style="color:${WCOL[d.k][0]}">${lab[i]}</span><span>${d.pop!=null?`降雨機率 ${d.pop}%`:""}<span class="conf cf${d.conf}" title="模型一致度：依預報天數與各模型雨量差距換算">一致度 ${CONF[d.conf]}</span></span></div>
    <div class="big"><canvas data-s="${WICO[d.k]}"></canvas><div><b>週${WDN[WEEKEND[i].getDay()]} ${md(WEEKEND[i])}</b><span style="color:${WCOL[d.k][0]}">${d.lab}</span></div></div>
    ${d.cwa?`<div class="cwa"><b>氣象署</b>${esc(d.cwa.wx)} · ${d.cwa.tmin}–${d.cwa.tmax}°C${d.cwa.pop!=null?` · 降雨 ${d.cwa.pop}%`:""}</div>`:""}
    <dl><dt>氣溫</dt><dd>${d.tmin}–${d.tmax}°C</dd><dt>雨量</dt><dd style="color:${d.mm>0?"#5FD0FF":"#fff"}">${d.mm==null?"—":d.mm+" mm"}</dd><dt>降雨時段</dt><dd style="color:#5FD0FF">${d.win||"—"}</dd>${d.mdl?`<dt title="各家全球模型預報的當日雨量（mm）">各模型雨量</dt><dd class="mdl">${d.mdl.list.map(([n,v])=>`<span class="${v>=1?"wet":""}" title="${n}模型 ${v==null?"—":v+" mm"}">${n[0]}${v==null?"—":v>=10?Math.round(v):Math.round(v*10)/10}</span>`).join("")}</dd>`:""}<dt>陣風</dt><dd>${d.gust==null?"—":`${d.gust} m/s（${bft(d.gust)} 級）`}</dd>
-   <dt>夜間濕度</dt><dd>${d.rhN!=null?d.rhN+"%":"—"}</dd><dt>結露風險</dt><dd style="color:${d.dew===2?"#ff8f7a":d.dew===1?"#F2B233":"#fff"}">${d.dew!=null?DEWL[d.dew]:"—"}</dd><dt>起霧</dt><dd>${d.fog?`約 ${d.fog} 小時`:"—"}</dd><dt>日落</dt><dd>${d.sunset||"—"}</dd></dl>
+   <dt>夜間濕度</dt><dd>${d.rhN!=null?d.rhN+"%":"—"}</dd><dt>結露風險</dt><dd style="color:${d.dew===2?"#ff8f7a":d.dew===1?"#F2B233":"#fff"}">${d.dew!=null?DEWL[d.dew]+(d.sp!=null?`<small style="color:#9AA6D6;font-size:12px">（溫差 ${d.sp}°C）</small>`:""):"—"}</dd><dt>起霧</dt><dd>${d.fog?`約 ${d.fog} 小時`:"—"}</dd><dt>日落</dt><dd>${d.sunset||"—"}</dd></dl>
    <div class="dtip">${dayTip(d,i,T)}</div></div>`:`<div class="rwin dcard"><div class="t"><span class="px">${lab[i]}</span></div><div style="padding:30px 0;color:#9AA6D6;text-align:center">已過去</div></div>`).join("")}
    <div class="rwin eqw"><div class="t"><span class="px">EQUIP</span><span>勇者裝備建議</span></div><ul>${equip(T).map(e=>`<li><b>${esc(e[0])}</b>${esc(e[1])}</li>`).join("")}</ul>
-   <div class="week">${NEXT7.map(dt=>{const d=dayOf(T,iso(dt));const we=[5,6,0].includes(dt.getDay());return d?`<div class="wday${we?" we":""}" title="${md(dt)} ${d.lab} ${d.tmin}–${d.tmax}°C 雨量 ${d.mm}mm 可信度${CONF[d.conf]}">週${WDN[dt.getDay()]}<canvas data-s="${WICO[d.k]}"></canvas><b>${d.tmin}–${d.tmax}°</b></div>`:""}).join("")}</div></div></div>`;
+   <div class="week">${NEXT7.map(dt=>{const d=dayOf(T,iso(dt));const we=[5,6,0].includes(dt.getDay());return d?`<div class="wday${we?" we":""}" title="${md(dt)} ${d.lab} ${d.tmin}–${d.tmax}°C 雨量 ${d.mm}mm 模型一致度${CONF[d.conf]}">週${WDN[dt.getDay()]}<canvas data-s="${WICO[d.k]}"></canvas><b>${d.tmin}–${d.tmax}°</b></div>`:""}).join("")}</div></div></div>`;
   el.querySelectorAll("canvas[data-s]").forEach(c=>draw(c,c.dataset.s));
   const r2=document.getElementById("wxRetry2");if(r2)r2.onclick=()=>{T.wx=null;openCamp(T.idx,false)};
   document.getElementById("shareImg").onclick=shareCard;document.getElementById("shareLink").onclick=copyLink;
@@ -714,7 +721,7 @@ const CIDX=CAMPW.map((r,i)=>[norm(r[0]+" "+r[1]+r[2]),i]);
 async function copyLink(){const u=shareURL(wxSel);try{await navigator.clipboard.writeText(u);flash("已複製連結")}catch(e){flash(u)}}
 function flash(t){let f=document.getElementById("flash");if(!f){f=document.createElement("div");f.id="flash";f.className="toast";document.body.appendChild(f)}f.innerHTML=`<div><b>✦ ${esc(t)}</b></div>`;requestAnimationFrame(()=>f.classList.add("on"));clearTimeout(f._t);f._t=setTimeout(()=>f.classList.remove("on"),2200)}
 function cardCanvas(T){
-  const W=1080,H=1700,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
+  const W=1080,H=1740,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
   const F="'Noto Sans TC','Noto Sans CJK TC',sans-serif",P="'Press Start 2P',monospace";
   g.fillStyle="#0d1340";g.fillRect(0,0,W,H);for(let y=0;y<H;y+=6){g.fillStyle="#111a4c";g.fillRect(0,y,W,3)}
   const win=(x,y,w,h)=>{g.fillStyle="#10173A";g.fillRect(x-4,y-4,w+8,h+8);g.fillStyle="#ffffff";g.fillRect(x,y,w,h);g.fillStyle="rgba(16,23,58,.97)";g.fillRect(x+5,y+5,w-10,h-10)};
@@ -729,7 +736,7 @@ function cardCanvas(T){
   const lab=["FRI","SAT","SUN"],BY=330,BH=800;
   const kv=(k,v,x,y,col)=>{txt(k,x+22,y,21,"#DCE3FF",F,500);g.font=`900 21px ${F}`;let vv=String(v);while(g.measureText(vv).width>170&&vv.length>3)vv=vv.slice(0,-2)+"…";txt(vv,x+298,y,21,col||"#fff",F,900,"right")};
   T.days.forEach((d,i)=>{const x=40+i*340,y=BY;win(x,y,320,BH);txt(lab[i],x+22,y+42,18,d?WCOL[d.k][0]:"#9AA6D6",P,400);
-    if(d){g.font=`700 16px ${F}`;txt(`${d.pop!=null?"降雨機率 "+d.pop+"%":""}`,x+190,y+40,16,"#9AA6D6",F,700,"right");const cc=["#6cc04a","#F2B233","#ff8f7a"][d.conf];g.strokeStyle=cc;g.lineWidth=2;g.strokeRect(x+200,y+22,98,26);txt(`可信度 ${CONF[d.conf]}`,x+249,y+41,15,cc,F,700,"center")}
+    if(d){g.font=`700 16px ${F}`;txt(`${d.pop!=null?"降雨機率 "+d.pop+"%":""}`,x+190,y+40,16,"#9AA6D6",F,700,"right");const cc=["#6cc04a","#F2B233","#ff8f7a"][d.conf];g.strokeStyle=cc;g.lineWidth=2;g.strokeRect(x+200,y+22,98,26);txt(`一致度 ${CONF[d.conf]}`,x+249,y+41,15,cc,F,700,"center")}
     txt(`${md(WEEKEND[i])}（${WDN[WEEKEND[i].getDay()]}）`,x+22,y+88,28);
     if(!d){txt("已過去",x+160,y+300,26,"#9AA6D6",F,700,"center");return}
     sprite(WICO[d.k],x+22,y+104,76);txt(d.lab,x+112,y+156,30,WCOL[d.k][0]);
@@ -746,7 +753,7 @@ function cardCanvas(T){
         const wet=v>=1;g.strokeStyle=wet?"#5FD0FF":"#3a4580";g.lineWidth=2;g.strokeRect(cx,yy,w,28);txt(t,cx+7,yy+21,18,wet?"#5FD0FF":"#9AA6D6",F,700);cx+=w+6});yy+=28+L}
     kv("陣風",d.gust==null?"—":`${d.gust} m/s（${bft(d.gust)} 級）`,x,yy);yy+=L;
     kv("夜間濕度",d.rhN!=null?d.rhN+"%":"—",x,yy);yy+=L;
-    kv("結露風險",d.dew!=null?DEWL[d.dew]:"—",x,yy,d.dew===2?"#ff8f7a":d.dew===1?"#F2B233":"#fff");yy+=L;
+    kv("結露風險",d.dew!=null?DEWL[d.dew]+(d.sp!=null?"（差"+d.sp+"°）":""):"—",x,yy,d.dew===2?"#ff8f7a":d.dew===1?"#F2B233":"#fff");yy+=L;
     kv("起霧",d.fog?`約 ${d.fog} 小時`:"—",x,yy);yy+=L;
     kv("日落",d.sunset||"—",x,yy);
     const tip=dayTip(d,i,T);if(tip){const ty=y+BH-88;g.fillStyle="#1e2a6b";g.fillRect(x+18,ty,284,68);wrap(tip,x+30,ty+28,262,28,19,"#fff",900)}});
@@ -755,8 +762,9 @@ function cardCanvas(T){
     const end=wrap(e[1],72+Math.min(w+16,420),yy,1000-Math.min(w+16,420)-60,30,21,"#ffffff",500);yy=end+40});
   const WY=EY+EH-140,cw=124;NEXT7.forEach((dt,k)=>{const d=dayOf(T,iso(dt));if(!d)return;const cx=72+k*(cw+10),we=[5,6,0].includes(dt.getDay());
     g.strokeStyle=we?"#FFE08A":"#9AA6D6";g.lineWidth=2;g.strokeRect(cx,WY,cw,116);txt(`週${WDN[dt.getDay()]}`,cx+cw/2,WY+28,19,"#fff",F,700,"center");sprite(WICO[d.k],cx+cw/2-20,WY+38,40);txt(`${d.tmin}–${d.tmax}°`,cx+cw/2,WY+104,20,"#fff",F,900,"center")});
+  txt("以上資訊僅提供參考與學術討論之用，氣象預報應以中央氣象署為準",W/2,H-66,18,"#FFE08A",F,700,"center");
   txt("你的露營天氣online · sleepoutside.github.io/hero-camping-map",40,H-28,18,"#DCE3FF",F,700);
-  txt(`資料 Open-Meteo${CWA&&CWA.issued&&T.days.some(d=>d&&d.cwa)?"・氣象署 "+CWA.issued.slice(5,10).replace("-","/")+" "+CWA.issued.slice(11,16):""} · ${md(new Date(WXAT||Date.now()))} 更新 · 僅供參考`,1040,H-28,15,"#9AA6D6",F,500,"right");
+  txt(`資料 Open-Meteo${CWA&&CWA.issued&&T.days.some(d=>d&&d.cwa)?"・氣象署 "+CWA.issued.slice(5,10).replace("-","/")+" "+CWA.issued.slice(11,16):""} · ${md(new Date(WXAT||Date.now()))} 更新`,1040,H-28,15,"#9AA6D6",F,500,"right");
   return c}
 const isMobile=()=>/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Macintosh/.test(navigator.userAgent));
 async function shareCard(){
